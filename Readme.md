@@ -30,35 +30,35 @@ First, install `Aiursoft.Canon` to your ASP.NET Core project from nuget.org:
 dotnet add package Aiursoft.Canon
 ```
 
-Add the service to your `IServiceCollection` in `StartUp.cs`:
+Add the service to your [`IServiceCollection`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection) in `StartUp.cs`:
 
 ```csharp
-services.AddCanon();
+using Aiursoft.Canon;
+
+services.AddTaskCanon();
 ```
 
-Then, you can inject `CanonService` to your controller:
+Then, you can inject `CanonService` to your controller. And now, you can fire and forget your task like this:
 
 ```csharp
 public class YourController : Controller
 {
     private readonly CanonService _cannonService;
 
-    public OAuthController(
-        CanonService canonService)
+    public OAuthController(CanonService canonService)
     {
         _canonService = canonService;
     }
+
+    public IActionResult Send()
+    {
+        // Send an confirmation email here:
+        _canonService.FireAsync<EmailSender>(async (sender) =>
+        {
+            await sender.SendAsync(); // Which may be slow. The service 'EmailSender' will be kept alive!
+        });
+    }
 }
-```
-
-And then, you can fire and forget your task like this:
-
-```csharp
-// Send him an confirmation email here:
-_canonService.FireAsync<EmailSender>(async (sender) =>
-{
-    await sender.SendAsync(); // Which may be slow. The service 'EmailSender' will be available to use.
-});
 ```
 
 That's it! Easy, right?
