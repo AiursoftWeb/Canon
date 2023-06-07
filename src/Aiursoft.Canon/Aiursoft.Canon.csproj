@@ -2,9 +2,21 @@
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
-		<Version>6.0.1</Version>
+		<Version>6.0.2</Version>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<!--Nuget-->
+		<Company>Aiursoft</Company>
+		<Product>Cannon</Product>
+		<Authors>anduin</Authors>
+		<Description>Task fire and forget framework</Description>
+		<PackageTags>task asp.net fire-and-forget task-pool</PackageTags>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://gitlab.aiursoft.cn/Aiursoft/Cannon.git</RepositoryUrl>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<PackageId>Aiursoft.Cannon</PackageId>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://gitlab.aiursoft.cn/Aiursoft/Cannon</PackageProjectUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
