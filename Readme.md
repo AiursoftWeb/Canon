@@ -3,7 +3,7 @@
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://gitlab.aiursoft.cn/aiursoft/canon/-/blob/master/LICENSE)
 [![Pipeline stat](https://gitlab.aiursoft.cn/aiursoft/canon/badges/master/pipeline.svg)](https://gitlab.aiursoft.cn/aiursoft/canon/-/pipelines)
 [![Test Coverage](https://gitlab.aiursoft.cn/aiursoft/canon/badges/master/coverage.svg)](https://gitlab.aiursoft.cn/aiursoft/canon/-/pipelines)
-[![NuGet version (Aiursoft.Scanner)](https://img.shields.io/nuget/v/Aiursoft.Canon.svg)](https://www.nuget.org/packages/Aiursoft.Canon/)
+[![NuGet version (Aiursoft.Canon)](https://img.shields.io/nuget/v/Aiursoft.Canon.svg)](https://www.nuget.org/packages/Aiursoft.Canon/)
 
 Aiursoft Cannon is used to implement dependency-based Fire and Forget for .NET projects, which means starting a heavy task without waiting for it to complete or caring about its success, and continuing with subsequent logic.
 
@@ -24,7 +24,7 @@ However, if your task depends on something like Entity Framework, it's hard to c
 
 ## How to use Aiursoft.Canon
 
-First, install `Aiursoft.Canon` to your ASP.NET Core project from nuget.org:
+First, install `Aiursoft.Canon` to your ASP.NET Core project from [nuget.org](https://www.nuget.org/packages/Aiursoft.Canon/):
 
 ```bash
 dotnet add package Aiursoft.Canon
