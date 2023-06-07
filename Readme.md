@@ -53,7 +53,6 @@ public class YourController : Controller
 
 And then, you can fire and forget your task like this:
 
-
 ```csharp
 // Send him an confirmation email here:
 _canonService.FireAsync<EmailSender>(async (sender) =>
@@ -62,7 +61,9 @@ _canonService.FireAsync<EmailSender>(async (sender) =>
 });
 ```
 
-That's it! Enjoy!
+That's it! Easy, right?
+
+---------
 
 ## Advanced usage
 
@@ -89,4 +90,28 @@ foreach (var user in users)
 }
 ```
 
-Why that is better? Because you can control the concurrency of your tasks. That helps you to avoid blocking your Email sender or database with too many tasks.
+That is far better than this:
+
+```csharp
+var tasks = new List<Task>();
+foreach (var user in users)
+{
+    tasks.Add(Task.Run(() => sender.SendAsync(user)));
+}
+await Task.WhenAll(tasks);
+```
+
+Don't do that anymore! It may start too many tasks and block your remote service like email sender.
+
+Now you can control the concurrency of your tasks. For example, you can start 16 tasks at the same time:
+
+```csharp
+_cannonQueue.QueueWithDependency<EmailSender>(async (sender) =>
+{
+    await sender.SendAsync(user); // Which may be slow. The service 'EmailSender' will be available to use.
+}, startTheEngine: false);// This won't start any task. We will await it manually.
+
+await _cannonQueue.RunTasksInQueue(16); // Start the engine with 16 concurrency and wait for all tasks to complete.
+```
+
+That helps you to avoid blocking your Email sender or database with too many tasks.

@@ -53,7 +53,8 @@ public class CanonQueue
     /// </summary>
     /// <typeparam name="T">The type of the dependency to be injected.</typeparam>
     /// <param name="bullet">A factory method that creates the task to be added to the queue.</param>
-    public void QueueWithDependency<T>(Func<T, Task> bullet) where T : class
+    /// <param name="startTheEngine">A boolean value indicating whether to start the engine to execute the tasks in the queue.</param>
+    public void QueueWithDependency<T>(Func<T, Task> bullet, bool startTheEngine = true) where T : class
     {
         QueueNew(async () =>
         {
@@ -73,7 +74,7 @@ public class CanonQueue
                     (dependency as IDisposable)?.Dispose();
                 }
             }
-        });
+        }, startTheEngine);
     }
 
     /// <summary>
