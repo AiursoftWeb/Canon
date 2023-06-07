@@ -26,11 +26,23 @@ public class SafeQueue<T>
 
     public bool Any()
     {
-        return queue.Any();
+        bool any;
+        lock (loc)
+        {
+            any = queue.Any();
+        }
+
+        return any;
     }
 
     public int Count()
     {
-        return queue.Count;
+        int count;
+        lock (loc)
+        {
+            count = queue.Count;
+        }
+
+        return count;
     }
 }
