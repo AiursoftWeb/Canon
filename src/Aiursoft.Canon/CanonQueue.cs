@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 namespace Aiursoft.Canon;
 
 /// <summary>
-/// 
+/// Implements a task queue that can be used to add tasks to a queue and execute them with a specified degree of parallelism.
 /// </summary>
 public class CanonQueue
 {
@@ -24,10 +24,10 @@ public class CanonQueue
     }
 
     /// <summary>
-    /// 
+    /// Adds a new task to the queue.
     /// </summary>
-    /// <param name="taskFactory"></param>
-    /// <param name="startTheEngine"></param>
+    /// <param name="taskFactory">A factory method that creates the task to be added to the queue.</param>
+    /// <param name="startTheEngine">A boolean value indicating whether to start the engine to execute the tasks in the queue.</param>
     public void QueueNew(Func<Task> taskFactory, bool startTheEngine = true)
     {
         _pendingTaskFactories.Enqueue(taskFactory);
@@ -49,34 +49,38 @@ public class CanonQueue
     }
 
     /// <summary>
-    /// 
+    /// Adds a new task to the queue with a dependency injection.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="bullet"></param>
+    /// <typeparam name="T">The type of the dependency to be injected.</typeparam>
+    /// <param name="bullet">A factory method that creates the task to be added to the queue.</param>
     public void QueueWithDependency<T>(Func<T, Task> bullet) where T : class
     {
         QueueNew(async () =>
         {
             using (var scope = _scopeFactory.CreateScope())
             {
+                var dependency = scope.ServiceProvider.GetRequiredService<T>();
                 try
                 {
-                    var dependency = scope.ServiceProvider.GetRequiredService<T>();
                     await bullet(dependency);
                 }
                 catch (Exception e)
                 {
                     _logger.LogCritical(e, $"An error occurred with a Canon task with dependency: '{typeof(T).Name}'.");
                 }
+                finally
+                {
+                    (dependency as IDisposable)?.Dispose();
+                }
             }
         });
     }
 
     /// <summary>
-    /// 
+    /// Executes the tasks in the queue with a specified degree of parallelism.
     /// </summary>
-    /// <param name="maxDegreeOfParallelism"></param>
-    /// <returns></returns>
+    /// <param name="maxDegreeOfParallelism">The maximum degree of parallelism to use when executing the tasks.</param>
+    /// <returns>A task that represents the completion of all the tasks in the queue.</returns>
     public async Task RunTasksInQueue(int maxDegreeOfParallelism = 8)
     {
         var tasksInFlight = new List<Task>(maxDegreeOfParallelism);
