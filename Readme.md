@@ -1,11 +1,11 @@
-# Aiursoft Cannon
+# Aiursoft Canon
 
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://gitlab.aiursoft.cn/aiursoft/canon/-/blob/master/LICENSE)
 [![Pipeline stat](https://gitlab.aiursoft.cn/aiursoft/canon/badges/master/pipeline.svg)](https://gitlab.aiursoft.cn/aiursoft/canon/-/pipelines)
 [![Test Coverage](https://gitlab.aiursoft.cn/aiursoft/canon/badges/master/coverage.svg)](https://gitlab.aiursoft.cn/aiursoft/canon/-/pipelines)
 [![NuGet version (Aiursoft.Canon)](https://img.shields.io/nuget/v/Aiursoft.Canon.svg)](https://www.nuget.org/packages/Aiursoft.Canon/)
 
-Aiursoft Cannon is used to implement dependency-based Fire and Forget for .NET projects, which means starting a heavy task without waiting for it to complete or caring about its success, and continuing with subsequent logic.
+Aiursoft Canon is used to implement dependency-based Fire and Forget for .NET projects, which means starting a heavy task without waiting for it to complete or caring about its success, and continuing with subsequent logic.
 
 This is very useful in many scenarios to avoid blocking, such as when sending emails.
 
@@ -43,7 +43,7 @@ Then, you can inject `CanonService` to your controller. And now, you can fire an
 ```csharp
 public class YourController : Controller
 {
-    private readonly CanonService _cannonService;
+    private readonly CanonService _canonService;
 
     public OAuthController(CanonService canonService)
     {
@@ -72,18 +72,18 @@ You can also put all your tasks to a task queue, and run those tasks with a limi
 Inject CanonQueue first:
 
 ```csharp
-private readonly CanonQueue _cannonQueue;
+private readonly CanonQueue _canonQueue;
 
-public DemoController(CanonQueue cannonQueue)
+public DemoController(CanonQueue canonQueue)
 {
-    _cannonQueue = cannonQueue;
+    _canonQueue = canonQueue;
 }
 ```
 
 ```csharp
 foreach (var user in users)
 {
-    _cannonQueue.QueueWithDependency<EmailSender>(async (sender) =>
+    _canonQueue.QueueWithDependency<EmailSender>(async (sender) =>
     {
         await sender.SendAsync(user); // Which may be slow. The service 'EmailSender' will be available to use.
     });
@@ -106,12 +106,12 @@ Don't do that anymore! It may start too many tasks and block your remote service
 Now you can control the concurrency of your tasks. For example, you can start 16 tasks at the same time:
 
 ```csharp
-_cannonQueue.QueueWithDependency<EmailSender>(async (sender) =>
+_canonQueue.QueueWithDependency<EmailSender>(async (sender) =>
 {
     await sender.SendAsync(user); // Which may be slow. The service 'EmailSender' will be available to use.
 }, startTheEngine: false);// This won't start any task. We will await it manually.
 
-await _cannonQueue.RunTasksInQueue(16); // Start the engine with 16 concurrency and wait for all tasks to complete.
+await _canonQueue.RunTasksInQueue(16); // Start the engine with 16 concurrency and wait for all tasks to complete.
 ```
 
 That helps you to avoid blocking your Email sender or database with too many tasks.
