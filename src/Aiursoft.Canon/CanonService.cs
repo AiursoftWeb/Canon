@@ -31,7 +31,7 @@ public class CanonService
     /// <param name="bullet">The action to execute.</param>
     public void Fire<T>(Action<T> bullet) where T : class
     {
-        _logger.LogInformation("Canon Service started a new action.");
+        _logger.LogInformation("Fired a new async action with dependency: {Dependency}", typeof(T).Name);
         Task.Run(() =>
         {
             using var scope = _scopeFactory.CreateScope();
@@ -42,7 +42,7 @@ public class CanonService
             }
             catch (Exception e)
             {
-                _logger.LogCritical(e, "Cannon crashed inside a task!");
+                _logger.LogError(e, "Cannon crashed inside a task with dependency: {Dependency}", typeof(T).Name);
             }
             finally
             {
@@ -58,7 +58,7 @@ public class CanonService
     /// <param name="bullet">The asynchronous function to execute.</param>
     public void FireAsync<T>(Func<T, Task> bullet) where T : class
     {
-        _logger.LogInformation("Fired a new async action.");
+        _logger.LogInformation("Fired a new async action with dependency: {Dependency}", typeof(T).Name);
         Task.Run(async () =>
         {
             using var scope = _scopeFactory.CreateScope();
@@ -69,7 +69,7 @@ public class CanonService
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Cannon crashed inside a task!");
+                _logger.LogError(e, "Cannon crashed inside a task with dependency: {Dependency}", typeof(T).Name);
             }
             finally
             {
