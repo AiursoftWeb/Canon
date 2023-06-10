@@ -33,7 +33,7 @@ public class CanonServiceTests
     }
 
     [TestMethod]
-    public async Task TestCannon()
+    public async Task TestCanon()
     {
         var controller = _serviceProvider?.GetRequiredService<DemoController>();
         var stopwatch = new Stopwatch();
@@ -47,7 +47,7 @@ public class CanonServiceTests
     }
 
     [TestMethod]
-    public async Task TestCannonAsync()
+    public async Task TestCanonAsync()
     {
         var controller = _serviceProvider?.GetRequiredService<DemoController>();
         var stopwatch = new Stopwatch();

@@ -55,32 +55,32 @@ internal class DemoService
 
 public class DemoController
 {
-    private readonly CanonQueue _cannonQueue;
-    private readonly CanonService _cannonService;
+    private readonly CanonQueue _canonQueue;
+    private readonly CanonService _canonService;
 
     public DemoController(
-        CanonService cannonService,
-        CanonQueue cannonQueue)
+        CanonService canonService,
+        CanonQueue canonQueue)
     {
-        _cannonService = cannonService;
-        _cannonQueue = cannonQueue;
+        _canonService = canonService;
+        _canonQueue = canonQueue;
     }
 
     public void DemoAction()
     {
-        _cannonService.Fire<DemoService>(d => d.DoSomethingSlow());
+        _canonService.Fire<DemoService>(d => d.DoSomethingSlow());
     }
 
     public void DemoActionAsync()
     {
-        _cannonService.FireAsync<DemoService>(d => d.DoSomethingSlowAsync());
+        _canonService.FireAsync<DemoService>(d => d.DoSomethingSlowAsync());
     }
 
     public void QueueActionAsync()
     {
         for (var i = 0; i < 32; i++)
         {
-            _cannonQueue.QueueWithDependency<DemoService>(d => d.DoSomethingSlowAsync());
+            _canonQueue.QueueWithDependency<DemoService>(d => d.DoSomethingSlowAsync());
         }
     }
 }

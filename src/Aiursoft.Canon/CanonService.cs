@@ -42,7 +42,7 @@ public class CanonService
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Cannon crashed inside a task with dependency: {Dependency}", typeof(T).Name);
+                _logger.LogError(e, "Canon crashed inside a task with dependency: {Dependency}", typeof(T).Name);
             }
             finally
             {
@@ -69,7 +69,7 @@ public class CanonService
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Cannon crashed inside a task with dependency: {Dependency}", typeof(T).Name);
+                _logger.LogError(e, "Canon crashed inside a task with dependency: {Dependency}", typeof(T).Name);
             }
             finally
             {

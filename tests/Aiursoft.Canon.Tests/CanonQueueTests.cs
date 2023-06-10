@@ -34,16 +34,16 @@ public class CanonQueueTests
     }
 
     [TestMethod]
-    public async Task TestCannonQueueMultipleTimes()
+    public async Task TestCanonQueueMultipleTimes()
     {
-        await TestCannonQueue();
+        await TestCanonQueue();
         await Task.Delay(100);
         Clean();
-        await TestCannonQueue();
+        await TestCanonQueue();
     }
 
     [TestMethod]
-    public async Task TestCannonQueue()
+    public async Task TestCanonQueue()
     {
         var controller = _serviceProvider?.GetRequiredService<DemoController>();
         var stopwatch = new Stopwatch();
