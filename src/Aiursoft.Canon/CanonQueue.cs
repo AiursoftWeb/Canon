@@ -12,7 +12,7 @@ public class CanonQueue
     private readonly ILogger<CanonQueue> _logger;
     private readonly SafeQueue<Func<Task>> _pendingTaskFactories = new();
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly object loc = new();
+    private readonly object _loc = new();
     private Task _engine = Task.CompletedTask;
 
     public CanonQueue(
@@ -36,14 +36,14 @@ public class CanonQueue
             return;
         }
 
-        lock (loc)
+        lock (_loc)
         {
             if (!_engine.IsCompleted)
             {
                 return;
             }
 
-            _logger.LogDebug("Engine is sleeping. Trying to wake it up.");
+            _logger.LogDebug("Engine is sleeping. Trying to wake it up");
             _engine = RunTasksInQueue();
         }
     }
@@ -67,7 +67,7 @@ public class CanonQueue
                 }
                 catch (Exception e)
                 {
-                    _logger.LogCritical(e, $"An error occurred with a Canon task with dependency: '{typeof(T).Name}'.");
+                    _logger.LogCritical(e, "An error occurred with a Canon task with dependency: '{Dependency}'", typeof(T).Name);
                 }
                 finally
                 {
@@ -92,13 +92,13 @@ public class CanonQueue
                 var taskFactory = _pendingTaskFactories.Dequeue();
                 tasksInFlight.Add(taskFactory());
                 _logger.LogDebug(
-                    $"Engine selected one job to run. Currently there are still {_pendingTaskFactories.Count()} jobs remaining. {tasksInFlight.Count} jobs running.");
+                    "Engine selected one job to run. Currently there are still {Remaining} jobs remaining. {InFlight} jobs running", _pendingTaskFactories.Count(), tasksInFlight.Count);
             }
 
             var completedTask = await Task.WhenAny(tasksInFlight).ConfigureAwait(false);
             await completedTask.ConfigureAwait(false);
             _logger.LogInformation(
-                $"Engine finished one job. Currently there are still {_pendingTaskFactories.Count()} jobs remaining. {tasksInFlight.Count} jobs running.");
+                "Engine finished one job. Currently there are still {Remaining} jobs remaining. {InFlight} jobs running", _pendingTaskFactories.Count(), tasksInFlight.Count);
             tasksInFlight.Remove(completedTask);
         }
     }

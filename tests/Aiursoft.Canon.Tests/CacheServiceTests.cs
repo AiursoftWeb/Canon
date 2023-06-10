@@ -22,7 +22,7 @@ public async Task RunWithCache_ReturnsCachedValue_WhenCacheIsNotEmpty()
     var cacheService = new CacheService(memoryCache, _logger);
 
     // Act
-    var result = await cacheService.RunWithCache<string>(cacheKey, () => Task.FromResult("FallbackValue"));
+    var result = await cacheService.RunWithCache(cacheKey, () => Task.FromResult("FallbackValue"));
 
     // Assert
     Assert.AreEqual(cacheValue, result);
@@ -39,7 +39,7 @@ public async Task RunWithCache_ReturnsFallbackValue_WhenCacheIsEmpty()
     var cacheService = new CacheService(memoryCache, _logger);
 
     // Act
-    var result = await cacheService.RunWithCache<string>(cacheKey, () => Task.FromResult(fallbackValue));
+    var result = await cacheService.RunWithCache(cacheKey, () => Task.FromResult(fallbackValue));
 
     // Assert
     Assert.AreEqual(fallbackValue, result);
@@ -58,7 +58,7 @@ public async Task RunWithCache_ReturnsFallbackValue_WhenCacheIsExpired()
     var cacheService = new CacheService(memoryCache, _logger);
 
     // Act
-    var result = await cacheService.RunWithCache<string>(cacheKey, () => Task.FromResult("FallbackValue"));
+    var result = await cacheService.RunWithCache(cacheKey, () => Task.FromResult("FallbackValue"));
 
     // Assert
     Assert.AreEqual("FallbackValue", result);
@@ -76,7 +76,7 @@ public async Task QueryCacheWithSelector_ReturnsCachedValue_WhenCacheIsNotEmpty(
     var cacheService = new CacheService(memoryCache, _logger);
 
     // Act
-    var result = await cacheService.QueryCacheWithSelector<string, int>(cacheKey, () => Task.FromResult("FallbackValue"), value => value.Length);
+    var result = await cacheService.QueryCacheWithSelector(cacheKey, () => Task.FromResult("FallbackValue"), value => value.Length);
 
     // Assert
     Assert.AreEqual(cacheValue.Length, result);
@@ -93,7 +93,7 @@ public async Task QueryCacheWithSelector_ReturnsFallbackValue_WhenCacheIsEmpty()
     var cacheService = new CacheService(memoryCache, _logger);
 
     // Act
-    var result = await cacheService.QueryCacheWithSelector<string, int>(cacheKey, () => Task.FromResult(fallbackValue), value => value.Length);
+    var result = await cacheService.QueryCacheWithSelector(cacheKey, () => Task.FromResult(fallbackValue), value => value.Length);
 
     // Assert
     Assert.AreEqual(fallbackValue.Length, result);
@@ -112,7 +112,7 @@ public async Task QueryCacheWithSelector_ReturnsFallbackValue_WhenCacheIsExpired
     var cacheService = new CacheService(memoryCache, _logger);
 
     // Act
-    var result = await cacheService.QueryCacheWithSelector<string, int>(cacheKey, () => Task.FromResult("FallbackValue"), value => value.Length);
+    var result = await cacheService.QueryCacheWithSelector(cacheKey, () => Task.FromResult("FallbackValue"), value => value.Length);
 
     // Assert
     Assert.AreEqual("FallbackValue".Length, result);
