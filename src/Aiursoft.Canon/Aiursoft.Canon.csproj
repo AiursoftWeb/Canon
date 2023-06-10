@@ -7,16 +7,16 @@
 		<Nullable>enable</Nullable>
 		<!--Nuget-->
 		<Company>Aiursoft</Company>
-		<Product>Cannon</Product>
+		<Product>Canon</Product>
 		<Authors>anduin</Authors>
 		<Description>Task fire and forget framework</Description>
 		<PackageTags>task asp.net fire-and-forget task-pool</PackageTags>
 		<RepositoryType>git</RepositoryType>
-		<RepositoryUrl>https://gitlab.aiursoft.cn/Aiursoft/Cannon.git</RepositoryUrl>
+		<RepositoryUrl>https://gitlab.aiursoft.cn/Aiursoft/Canon.git</RepositoryUrl>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<PackageId>Aiursoft.Cannon</PackageId>
+		<PackageId>Aiursoft.Canon</PackageId>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageProjectUrl>https://gitlab.aiursoft.cn/Aiursoft/Cannon</PackageProjectUrl>
+		<PackageProjectUrl>https://gitlab.aiursoft.cn/Aiursoft/Canon</PackageProjectUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
