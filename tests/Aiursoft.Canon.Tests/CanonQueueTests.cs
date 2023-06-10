@@ -59,7 +59,7 @@ public class CanonQueueTests
         {
             await Task.Delay(20);
             Console.WriteLine(
-                $"Waitted for {stopwatch.Elapsed}. And {DemoService.DoneTimes} tasks are finished.");
+                $"Waited for {stopwatch.Elapsed}. And {DemoService.DoneTimes} tasks are finished.");
         }
         stopwatch.Stop();
         Assert.IsTrue(stopwatch.ElapsedMilliseconds < 5000, "All actions should finish in 5 seconds.");

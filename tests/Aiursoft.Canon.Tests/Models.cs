@@ -10,7 +10,7 @@ public class InDbEntity
 
 public class SqlDbContext : DbContext
 {
-    public DbSet<InDbEntity> Records => this.Set<InDbEntity>();
+    public DbSet<InDbEntity> Records => Set<InDbEntity>();
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
@@ -23,7 +23,7 @@ internal class DemoService
     public static bool Done;
     public static bool DoneAsync;
     public static int DoneTimes;
-    private static readonly object obj = new();
+    private static readonly object Loc = new();
     private readonly SqlDbContext _dbContext;
 
     public DemoService(SqlDbContext dbContext)
@@ -46,7 +46,7 @@ internal class DemoService
         _dbContext.Records.Add(new InDbEntity { Content = "Test", Filter = "Test" });
         await _dbContext.SaveChangesAsync();
         DoneAsync = true;
-        lock (obj)
+        lock (Loc)
         {
             DoneTimes++;
         }

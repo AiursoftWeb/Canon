@@ -41,7 +41,7 @@ public class CacheService
     {
         cacheCondition ??= (_) => true;
 
-        if (!this._cache.TryGetValue(cacheKey, out T resultValue) || resultValue == null || cachedMinutes <= 0 ||
+        if (!_cache.TryGetValue(cacheKey, out T resultValue) || resultValue == null || cachedMinutes <= 0 ||
             cacheCondition(resultValue) == false)
         {
             resultValue = await fallback();
@@ -54,14 +54,14 @@ public class CacheService
                 var cacheEntryOptions = new MemoryCacheEntryOptions()
                     .SetAbsoluteExpiration(TimeSpan.FromMinutes(cachedMinutes));
 
-                this._cache.Set(cacheKey, resultValue, cacheEntryOptions);
-                this._logger.LogInformation("Cache set for {CachedMinutes} minutes with cached key: {CacheKey}",
+                _cache.Set(cacheKey, resultValue, cacheEntryOptions);
+                _logger.LogInformation("Cache set for {CachedMinutes} minutes with cached key: {CacheKey}",
                     cachedMinutes, cacheKey);
             }
         }
         else
         {
-            this._logger.LogInformation("Cache was hit with cached key: {CacheKey}", cacheKey);
+            _logger.LogInformation("Cache was hit with cached key: {CacheKey}", cacheKey);
         }
 
         return resultValue;
@@ -87,7 +87,7 @@ public class CacheService
     {
         cacheCondition ??= (_) => true;
 
-        if (!this._cache.TryGetValue(cacheKey, out T1 resultValue) || resultValue == null || cachedMinutes <= 0 ||
+        if (!_cache.TryGetValue(cacheKey, out T1 resultValue) || resultValue == null || cachedMinutes <= 0 ||
             cacheCondition(resultValue) == false)
         {
             resultValue = await fallback();
@@ -101,14 +101,14 @@ public class CacheService
                 var cacheEntryOptions = new MemoryCacheEntryOptions()
                     .SetSlidingExpiration(TimeSpan.FromMinutes(cachedMinutes));
 
-                this._cache.Set(cacheKey, resultValue, cacheEntryOptions);
-                this._logger.LogInformation("Cache set for {CachedMinutes} minutes with cached key: {CacheKey}",
+                _cache.Set(cacheKey, resultValue, cacheEntryOptions);
+                _logger.LogInformation("Cache set for {CachedMinutes} minutes with cached key: {CacheKey}",
                     cachedMinutes, cacheKey);
             }
         }
         else
         {
-            this._logger.LogInformation("Cache was hit with cached key: {CacheKey}", cacheKey);
+            _logger.LogInformation("Cache was hit with cached key: {CacheKey}", cacheKey);
         }
 
         return selector(resultValue);
@@ -120,6 +120,6 @@ public class CacheService
     /// <param name="key">The key used to identify the cached data to remove.</param>
     public void Clear(string key)
     {
-        this._cache.Remove(key);
+        _cache.Remove(key);
     }
 }
