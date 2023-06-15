@@ -10,6 +10,7 @@ public static class Extensions
         services.AddTransient<RetryEngine>();
         
         // An easier to use Cache service.
+        // Requires IMemoryCache!
         services.AddTransient<CacheService>();
         
         // A transient service to replace 'Task.WhenAll()'.

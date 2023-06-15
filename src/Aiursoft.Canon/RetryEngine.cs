@@ -30,7 +30,8 @@ public class RetryEngine
     public async Task<T> RunWithRetry<T>(
         Func<int, Task<T>> taskFactory,
         int attempts = 3,
-        Predicate<Exception>? when = null)
+        Predicate<Exception>? when = null,
+        Action<Exception>? onError = null)
     {
         for (var i = 1; i <= attempts; i++)
         {
@@ -42,6 +43,7 @@ public class RetryEngine
             }
             catch (Exception e)
             {
+                onError?.Invoke(e);
                 if (when != null)
                 {
                     var shouldRetry = when.Invoke(e);
