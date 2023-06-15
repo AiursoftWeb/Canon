@@ -5,7 +5,11 @@ using Microsoft.Extensions.Logging;
 namespace Aiursoft.Canon;
 
 /// <summary>
+/// Application singleton background job queue.
+/// 
 /// Implements a task queue that can be used to add tasks to a queue and execute them with a specified degree of parallelism.
+///
+/// This service shall be used from dependency injection and is an application wide global queue, used for fire and forget.
 /// </summary>
 public class CanonQueue
 {

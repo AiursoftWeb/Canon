@@ -59,5 +59,4 @@ public class CanonServiceTests
         await Task.Delay(600);
         Assert.AreEqual(true, DemoService.DoneAsync, "After a while, the async job is done.");
     }
-
 }

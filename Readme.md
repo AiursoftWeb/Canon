@@ -22,7 +22,7 @@ _ = Task.Run(() =>
 
 However, if your task depends on something like Entity Framework, it's hard to control it's life cycle.
 
-## How to use Aiursoft.Canon
+## Installation
 
 First, install `Aiursoft.Canon` to your ASP.NET Core project from [nuget.org](https://www.nuget.org/packages/Aiursoft.Canon/):
 
@@ -38,25 +38,29 @@ using Aiursoft.Canon;
 services.AddTaskCanon();
 ```
 
+## How to use Aiursoft.CanonQueue
+
 Then, you can inject `CanonService` to your controller. And now, you can fire and forget your task like this:
 
 ```csharp
 public class YourController : Controller
 {
-    private readonly CanonService _canonService;
+    private readonly CanonQueue _canonQueue;
 
-    public OAuthController(CanonService canonService)
+    public OAuthController(CanonQueue canonQueue)
     {
-        _canonService = canonService;
+        _canonQueue = canonQueue;
     }
 
     public IActionResult Send()
     {
         // Send an confirmation email here:
-        _canonService.FireAsync<EmailSender>(async (sender) =>
+        _canonQueue.QueueWithDependency<EmailSender>(async (sender) =>
         {
             await sender.SendAsync(); // Which may be slow. The service 'EmailSender' will be kept alive!
         });
+        
+        return Ok();
     }
 }
 ```
@@ -65,29 +69,35 @@ That's it! Easy, right?
 
 ---------
 
-## Advanced usage
+## How to use Aiursoft.CanonPool
 
 You can also put all your tasks to a task queue, and run those tasks with a limit of concurrency:
 
-Inject CanonQueue first:
+Inject CanonPool first:
 
 ```csharp
-private readonly CanonQueue _canonQueue;
+private readonly EmailSender _sender;
+private readonly CanonPool _canonPool;
 
-public DemoController(CanonQueue canonQueue)
+public DemoController(
+    EmailSender sender,
+    CanonPool canonPool)
 {
-    _canonQueue = canonQueue;
+    _sender = sender;
+    _canonPool = canonPool;
 }
 ```
 
 ```csharp
 foreach (var user in users)
 {
-    _canonQueue.QueueWithDependency<EmailSender>(async (sender) =>
+    _canonPool.RegisterNewTaskToPool(async (sender) =>
     {
-        await sender.SendAsync(user); // Which may be slow. The service 'EmailSender' will be available to use.
+        await sender.SendAsync(user); // Which may be slow.
     });
 }
+
+await _canonPool.RunAllTasksInPoolAsync(); // Execute tasks in pool, running tasks should be max at 8.
 ```
 
 That is far better than this:
@@ -98,20 +108,13 @@ foreach (var user in users)
 {
     tasks.Add(Task.Run(() => sender.SendAsync(user)));
 }
-await Task.WhenAll(tasks);
+await Task.WhenAll(tasks); // It may start too many tasks and block your remote service like email sender.
 ```
 
-Don't do that anymore! It may start too many tasks and block your remote service like email sender.
-
-Now you can control the concurrency of your tasks. For example, you can start 16 tasks at the same time:
+Now you can control the concurrency of your tasks. For example, you can start 6 tasks at the same time:
 
 ```csharp
-_canonQueue.QueueWithDependency<EmailSender>(async (sender) =>
-{
-    await sender.SendAsync(user); // Which may be slow. The service 'EmailSender' will be available to use.
-}, startTheEngine: false);// This won't start any task. We will await it manually.
-
-await _canonQueue.RunTasksInQueue(16); // Start the engine with 16 concurrency and wait for all tasks to complete.
+await _canonQueue.RunTasksInQueue(6); // Start the engine with 16 concurrency and wait for all tasks to complete.
 ```
 
 That helps you to avoid blocking your Email sender or database with too many tasks.

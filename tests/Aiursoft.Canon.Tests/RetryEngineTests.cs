@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Net;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Aiursoft.Canon.Tests;
@@ -33,5 +34,31 @@ public class RetryEngineTests
         }, attempts: 3);
 
         Assert.AreEqual(42, result);
+    }
+    
+    [TestMethod]
+    public async Task RunWithRetry_ShouldNotRetry()
+    {
+        var engine = new RetryEngine(_logger);
+
+        try
+        {
+            await engine.RunWithRetry<int>(
+                attempt =>
+                {
+                    if (attempt == 1)
+                    {
+                        throw new BadImageFormatException("Test BadImageFormatException");
+                    }
+                    throw new WebException("Test exception");
+                }, 
+                attempts: int.MaxValue, 
+                when: e => e is BadImageFormatException);
+            Assert.Fail("Should not success!");
+        }
+        catch (Exception e)
+        {
+            Assert.IsTrue(e is WebException);
+        }
     }
 }

@@ -4,7 +4,11 @@ using Microsoft.Extensions.Logging;
 namespace Aiursoft.Canon;
 
 /// <summary>
+/// Simple Fire and forget service that runs immediately.
+/// 
 /// A service that provides a way to execute actions and tasks with dependency injection and logging.
+///
+/// This service shall be used from dependency injection and is an application wide global queue, used for fire and forget. To better control the threads, it is suggested to use CanonQueue instead.
 /// </summary>
 public class CanonService
 {
