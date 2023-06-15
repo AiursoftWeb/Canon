@@ -27,6 +27,7 @@ public class RetryEngine : ITransientDependency
     /// <param name="taskFactory">A function that returns the task to be executed.</param>
     /// <param name="attempts">The maximum number of attempts to execute the task. Default is 3.</param>
     /// <param name="when">An optional predicate that determines if the task should be retried based on the exception that occurred.</param>
+    /// <param name="onError">An optional action that triggers every time the task crashed.</param>
     /// <returns>The result of the task if it succeeds within the specified number of attempts, otherwise an exception is thrown.</returns>
     public async Task<T> RunWithRetry<T>(
         Func<int, Task<T>> taskFactory,
