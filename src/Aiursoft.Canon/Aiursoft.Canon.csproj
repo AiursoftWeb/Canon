@@ -20,6 +20,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Aiursoft.Scanner" Version="6.0.10" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.3" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />

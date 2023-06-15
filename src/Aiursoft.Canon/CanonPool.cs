@@ -1,4 +1,5 @@
 using Aiursoft.Canon.Models;
+using Aiursoft.Scanner.Abstract;
 using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.Canon;
@@ -10,7 +11,7 @@ namespace Aiursoft.Canon;
 ///
 /// This service shall be used from dependency injection and is a transient pool, used for replacement for 'Task.WhenAll()'.
 /// </summary>
-public class CanonPool
+public class CanonPool : ITransientDependency
 {
     private readonly ILogger<CanonPool> _logger;
     private readonly SafeQueue<Func<Task>> _pendingTaskFactories = new();

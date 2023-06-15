@@ -1,4 +1,5 @@
 ﻿using Aiursoft.Canon.Models;
+using Aiursoft.Scanner.Abstract;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -11,7 +12,7 @@ namespace Aiursoft.Canon;
 ///
 /// This service shall be used from dependency injection and is an application wide global queue, used for fire and forget.
 /// </summary>
-public class CanonQueue
+public class CanonQueue : ISingletonDependency
 {
     private readonly ILogger<CanonQueue> _logger;
     private readonly SafeQueue<Func<Task>> _pendingTaskFactories = new();

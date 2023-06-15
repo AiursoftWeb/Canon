@@ -1,11 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Aiursoft.Scanner.Abstract;
+using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.Canon;
 
 /// <summary>
 /// Provides a service for retrying tasks that may fail.
 /// </summary>
-public class RetryEngine
+public class RetryEngine : ITransientDependency
 {
     private static readonly Random Rnd = new();
     private readonly ILogger<RetryEngine> _logger;

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using Aiursoft.Scanner.Abstract;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.Canon;
@@ -6,7 +7,7 @@ namespace Aiursoft.Canon;
 /// <summary>
 /// Provides a service for caching data in memory.
 /// </summary>
-public class CacheService
+public class CacheService : ITransientDependency
 {
     private readonly IMemoryCache _cache;
     private readonly ILogger<CacheService> _logger;
