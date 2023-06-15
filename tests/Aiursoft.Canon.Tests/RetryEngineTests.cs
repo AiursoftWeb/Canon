@@ -44,6 +44,7 @@ public class RetryEngineTests
         try
         {
             await engine.RunWithRetry<int>(
+                // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
                 attempt =>
                 {
                     if (attempt == 1)
