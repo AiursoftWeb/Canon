@@ -38,7 +38,7 @@ using Aiursoft.Canon;
 services.AddTaskCanon();
 ```
 
-## How to use Aiursoft.CanonQueue
+### How to use Aiursoft.CanonQueue
 
 Then, you can inject `CanonService` to your controller. And now, you can fire and forget your task like this:
 
@@ -65,11 +65,9 @@ public class YourController : Controller
 }
 ```
 
-That's it! Easy, right?
+That's it.
 
----------
-
-## How to use Aiursoft.CanonPool
+### How to use Aiursoft.CanonPool
 
 You can also put all your tasks to a task queue, and run those tasks with a limit of concurrency:
 
