@@ -73,6 +73,19 @@ public class RetryEngine : ITransientDependency
         throw new InvalidOperationException("Code shall not reach here.");
     }
 
+    public async Task RunWithRetry(
+        Func<int, Task> taskFactory,
+        int attempts = 3,
+        Predicate<Exception>? when = null,
+        Action<Exception>? onError = null)
+    {
+        await RunWithRetry(async attempt =>
+        {
+            await taskFactory(attempt);
+            return 0;
+        }, attempts: attempts, when: when, onError: onError);
+    }
+
     /// <summary>
     /// Calculates the time to wait for the next retry attempt using an exponential backoff algorithm.
     /// </summary>

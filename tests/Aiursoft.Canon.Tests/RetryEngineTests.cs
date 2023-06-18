@@ -17,6 +17,22 @@ public class RetryEngineTests
         await Assert.ThrowsExceptionAsync<InvalidOperationException>(() =>
             engine.RunWithRetry<int>(_ => throw new InvalidOperationException("Test exception"), attempts: 3));
     }
+    
+    [TestMethod]
+    public async Task RunWithRetryWithoutResponse_ReturnsResultOnSuccess()
+    {
+        var engine = new RetryEngine(_logger);
+
+        await engine.RunWithRetry(attempt =>
+        {
+            if (attempt == 2)
+            {
+                return Task.CompletedTask;
+            }
+
+            throw new Exception("Test exception");
+        }, attempts: 3);
+    }
 
     [TestMethod]
     public async Task RunWithRetry_ReturnsResultOnSuccess()
