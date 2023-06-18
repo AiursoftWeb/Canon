@@ -38,15 +38,15 @@ public class CacheService : ITransientDependency
         string cacheKey,
         Func<Task<T>> fallback,
         Predicate<T>? cacheCondition = null,
-        Func<T, int>? cachedMinutes = null)
+        Func<T, TimeSpan>? cachedMinutes = null)
     {
         cacheCondition ??= _ => true;
-        cachedMinutes ??= _ => 20;
+        cachedMinutes ??= _ => TimeSpan.FromMinutes(20);
 
         if (!_cache.TryGetValue(cacheKey, out T resultValue) || 
             resultValue == null ||
             cacheCondition(resultValue) == false ||
-            cachedMinutes(resultValue) <= 0)
+            cachedMinutes(resultValue) <= TimeSpan.Zero)
         {
             resultValue = await fallback();
             if (resultValue == null)
@@ -55,10 +55,10 @@ public class CacheService : ITransientDependency
             }
 
             var minutesShouldCache = cachedMinutes(resultValue);
-            if (minutesShouldCache > 0 && cacheCondition(resultValue))
+            if (minutesShouldCache > TimeSpan.Zero && cacheCondition(resultValue))
             {
                 var cacheEntryOptions = new MemoryCacheEntryOptions()
-                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(minutesShouldCache));
+                    .SetAbsoluteExpiration(minutesShouldCache);
 
                 _cache.Set(cacheKey, resultValue, cacheEntryOptions);
                 _logger.LogInformation("Cache set for {CachedMinutes} minutes with cached key: {CacheKey}",
@@ -89,15 +89,15 @@ public class CacheService : ITransientDependency
         Func<Task<T1>> fallback,
         Func<T1, T2> selector,
         Predicate<T1>? cacheCondition = null,
-        Func<T1, int>? cachedMinutes = null)
+        Func<T1, TimeSpan>? cachedMinutes = null)
     {
         cacheCondition ??= (_) => true;
-        cachedMinutes ??= _ => 20;
+        cachedMinutes ??= _ => TimeSpan.FromMinutes(20);
 
         if (!_cache.TryGetValue(cacheKey, out T1 resultValue) || 
             resultValue == null || 
             cacheCondition(resultValue) == false ||
-            cachedMinutes(resultValue) <= 0)
+            cachedMinutes(resultValue) <= TimeSpan.Zero)
         {
             resultValue = await fallback();
             if (resultValue == null)
@@ -106,10 +106,10 @@ public class CacheService : ITransientDependency
             }
 
             var minutesShouldCache = cachedMinutes(resultValue);
-            if (minutesShouldCache > 0 && cacheCondition(resultValue))
+            if (minutesShouldCache > TimeSpan.Zero && cacheCondition(resultValue))
             {
                 var cacheEntryOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(minutesShouldCache));
+                    .SetSlidingExpiration(minutesShouldCache);
 
                 _cache.Set(cacheKey, resultValue, cacheEntryOptions);
                 _logger.LogInformation("Cache set for {CachedMinutes} minutes with cached key: {CacheKey}",
