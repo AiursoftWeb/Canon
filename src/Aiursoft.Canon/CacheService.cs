@@ -61,13 +61,13 @@ public class CacheService : ITransientDependency
                     .SetAbsoluteExpiration(minutesShouldCache);
 
                 _cache.Set(cacheKey, resultValue, cacheEntryOptions);
-                _logger.LogInformation("Cache set for {CachedMinutes} minutes with cached key: {CacheKey}",
+                _logger.LogTrace("Cache set for {CachedMinutes} minutes with cached key: {CacheKey}",
                     cachedMinutes, cacheKey);
             }
         }
         else
         {
-            _logger.LogInformation("Cache was hit with cached key: {CacheKey}", cacheKey);
+            _logger.LogTrace("Cache was hit with cached key: {CacheKey}", cacheKey);
         }
 
         return resultValue;
@@ -112,13 +112,13 @@ public class CacheService : ITransientDependency
                     .SetSlidingExpiration(minutesShouldCache);
 
                 _cache.Set(cacheKey, resultValue, cacheEntryOptions);
-                _logger.LogInformation("Cache set for {CachedMinutes} minutes with cached key: {CacheKey}",
+                _logger.LogTrace("Cache set for {CachedMinutes} minutes with cached key: {CacheKey}",
                     cachedMinutes, cacheKey);
             }
         }
         else
         {
-            _logger.LogInformation("Cache was hit with cached key: {CacheKey}", cacheKey);
+            _logger.LogTrace("Cache was hit with cached key: {CacheKey}", cacheKey);
         }
 
         return selector(resultValue);
