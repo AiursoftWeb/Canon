@@ -10,14 +10,19 @@ public static class Extensions
     /// (If your project is using Aiursoft.Scanner, you do NOT have to call this!)
     /// </summary>
     /// <param name="services">Services to be injected.</param>
+    /// <param name="addMemoryCache">If auto register the memory cache.</param>
     /// <returns>The original services.</returns>
-    public static IServiceCollection AddTaskCanon(this IServiceCollection services)
+    public static IServiceCollection AddTaskCanon(this IServiceCollection services, bool addMemoryCache = true)
     {
         // A retry engine.
         services.AddTransient<RetryEngine>();
 
         // An easier to use Cache service.
         // Requires IMemoryCache!
+        if (addMemoryCache)
+        {
+            services.AddMemoryCache();
+        }
         services.AddTransient<CacheService>();
 
         // A transient service to replace 'Task.WhenAll()'.
