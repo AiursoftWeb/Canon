@@ -1,5 +1,5 @@
 ﻿using Aiursoft.Canon.Models;
-using Aiursoft.Scanner.Abstract;
+using Aiursoft.Scanner.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

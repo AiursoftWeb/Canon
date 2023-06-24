@@ -1,4 +1,4 @@
-﻿using Aiursoft.Scanner.Abstract;
+﻿using Aiursoft.Scanner.Abstractions;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
