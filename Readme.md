@@ -38,6 +38,19 @@ using Aiursoft.Canon;
 services.AddTaskCanon();
 ```
 
+Your project will get:
+
+```csharp
+// A transient service to replace 'Task.WhenAll()'. Start all tasks with limited concurrency.
+services.AddTransient<CanonPool>();
+
+// Simple Fire and forget service that runs immediately. (No concurrency limitation)
+services.AddSingleton<CanonService>();
+
+// Application singleton background job queue. (Default task concurrency is 8)
+services.AddSingleton<CanonQueue>();
+```
+
 ### How to use Aiursoft.CanonQueue
 
 Then, you can inject `CanonService` to your controller. And now, you can fire and forget your task like this:
