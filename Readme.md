@@ -89,7 +89,7 @@ public DemoController(
 ```csharp
 foreach (var user in users)
 {
-    _canonPool.RegisterNewTaskToPool(async (sender) =>
+    _canonPool.RegisterNewTaskToPool(async () =>
     {
         await sender.SendAsync(user); // Which may be slow.
     });
