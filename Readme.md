@@ -109,10 +109,10 @@ foreach (var user in users)
 await Task.WhenAll(tasks); // It may start too many tasks and block your remote service like email sender.
 ```
 
-Now you can control the concurrency of your tasks. For example, you can start 6 tasks at the same time:
+Now you can control the concurrency of your tasks. For example, you can start 16 tasks at the same time:
 
 ```csharp
-await _canonQueue.RunTasksInQueue(6); // Start the engine with 16 concurrency and wait for all tasks to complete.
+await _canonQueue.RunTasksInQueue(16); // Start the engine with 16 concurrency and wait for all tasks to complete.
 ```
 
 That helps you to avoid blocking your Email sender or database with too many tasks.
