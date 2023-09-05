@@ -43,7 +43,7 @@ public class CacheService : ITransientDependency
         cacheCondition ??= _ => true;
         cachedMinutes ??= _ => TimeSpan.FromMinutes(20);
 
-        if (!_cache.TryGetValue(cacheKey, out T resultValue) || 
+        if (!_cache.TryGetValue(cacheKey, out T? resultValue) || 
             resultValue == null ||
             cacheCondition(resultValue) == false ||
             cachedMinutes(resultValue) <= TimeSpan.Zero)
@@ -94,7 +94,7 @@ public class CacheService : ITransientDependency
         cacheCondition ??= (_) => true;
         cachedMinutes ??= _ => TimeSpan.FromMinutes(20);
 
-        if (!_cache.TryGetValue(cacheKey, out T1 resultValue) || 
+        if (!_cache.TryGetValue(cacheKey, out T1? resultValue) || 
             resultValue == null || 
             cacheCondition(resultValue) == false ||
             cachedMinutes(resultValue) <= TimeSpan.Zero)
