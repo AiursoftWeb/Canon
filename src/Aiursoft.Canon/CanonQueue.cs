@@ -18,7 +18,7 @@ public class CanonQueue : ISingletonDependency
     private readonly SafeQueue<Func<Task>> _pendingTaskFactories = new();
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly object _loc = new();
-    private Task _engine = Task.CompletedTask;
+    public Task Engine = Task.CompletedTask;
 
     public CanonQueue(
         IServiceScopeFactory serviceScopeFactory,
@@ -44,13 +44,13 @@ public class CanonQueue : ISingletonDependency
 
         lock (_loc)
         {
-            if (!_engine.IsCompleted)
+            if (!Engine.IsCompleted)
             {
                 return;
             }
 
             _logger.LogDebug("Engine is sleeping. Trying to wake it up");
-            _engine = RunTasksInQueue(maxThreads);
+            Engine = RunTasksInQueue(maxThreads);
         }
     }
 
