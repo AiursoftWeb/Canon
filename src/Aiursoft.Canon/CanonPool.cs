@@ -50,7 +50,7 @@ public class CanonPool : ITransientDependency
 
             var completedTask = await Task.WhenAny(tasksInFlight).ConfigureAwait(false);
             await completedTask.ConfigureAwait(false);
-            _logger?.LogInformation(
+            _logger?.LogTrace(
                 "Engine finished one job. Currently there are still {Remaining} jobs remaining. {InFlight} jobs running", _pendingTaskFactories.Count(), tasksInFlight.Count);
             tasksInFlight.Remove(completedTask);
         }

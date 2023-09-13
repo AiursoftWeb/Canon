@@ -33,7 +33,7 @@ public class CanonQueue : ISingletonDependency
     /// </summary>
     /// <param name="taskFactory">A factory method that creates the task to be added to the queue.</param>
     /// <param name="startTheEngine">A boolean value indicating whether to start the engine to execute the tasks in the queue.</param>
-    public void QueueNew(Func<Task> taskFactory, bool startTheEngine = true)
+    public void QueueNew(Func<Task> taskFactory, bool startTheEngine = true, int maxThreads = 8)
     {
         _pendingTaskFactories.Enqueue(taskFactory);
         if (!startTheEngine)
@@ -49,7 +49,7 @@ public class CanonQueue : ISingletonDependency
             }
 
             _logger.LogDebug("Engine is sleeping. Trying to wake it up");
-            _engine = RunTasksInQueue();
+            _engine = RunTasksInQueue(maxThreads);
         }
     }
 
@@ -87,7 +87,7 @@ public class CanonQueue : ISingletonDependency
     /// </summary>
     /// <param name="maxDegreeOfParallelism">The maximum degree of parallelism to use when executing the tasks.</param>
     /// <returns>A task that represents the completion of all the tasks in the queue.</returns>
-    public async Task RunTasksInQueue(int maxDegreeOfParallelism = 8)
+    public async Task RunTasksInQueue(int maxDegreeOfParallelism)
     {
         var tasksInFlight = new List<Task>(maxDegreeOfParallelism);
         while (_pendingTaskFactories.Any() || tasksInFlight.Any())
@@ -102,7 +102,7 @@ public class CanonQueue : ISingletonDependency
 
             var completedTask = await Task.WhenAny(tasksInFlight).ConfigureAwait(false);
             await completedTask.ConfigureAwait(false);
-            _logger.LogInformation(
+            _logger.LogTrace(
                 "Engine finished one job. Currently there are still {Remaining} jobs remaining. {InFlight} jobs running", _pendingTaskFactories.Count(), tasksInFlight.Count);
             tasksInFlight.Remove(completedTask);
         }
