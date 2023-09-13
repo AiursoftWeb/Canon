@@ -33,6 +33,7 @@ public class CanonQueue : ISingletonDependency
     /// </summary>
     /// <param name="taskFactory">A factory method that creates the task to be added to the queue.</param>
     /// <param name="startTheEngine">A boolean value indicating whether to start the engine to execute the tasks in the queue.</param>
+    /// <param name="maxThreads">An int value indicating whether how many threads can be started to consume the tasks in the pool.</param>
     public void QueueNew(Func<Task> taskFactory, bool startTheEngine = true, int maxThreads = 8)
     {
         _pendingTaskFactories.Enqueue(taskFactory);
