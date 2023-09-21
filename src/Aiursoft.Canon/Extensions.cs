@@ -34,6 +34,9 @@ public static class Extensions
         // Application singleton background job queue.
         services.AddSingleton<CanonQueue>();
 
+        // A watch service to measure how much time a task used.
+        services.AddTransient<WatchService>();
+
         return services;
     }
 }

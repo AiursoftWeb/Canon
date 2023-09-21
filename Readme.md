@@ -41,6 +41,12 @@ services.AddTaskCanon();
 Your project will get:
 
 ```csharp
+// An easier to use Cache service. Allow you to execute some code with a key to cache it.
+services.AddTransient<CacheService>();
+
+// A transient service to retry a task with limited times.
+services.AddTransient<RetryEngine>();
+
 // A transient service to replace 'Task.WhenAll()'. Start all tasks with limited concurrency.
 services.AddTransient<CanonPool>();
 
@@ -49,6 +55,9 @@ services.AddSingleton<CanonService>();
 
 // Application singleton background job queue. (Default task concurrency is 8)
 services.AddSingleton<CanonQueue>();
+
+// A watch service to measure how much time a task used.
+services.AddTransient<WatchService>();
 ```
 
 ### How to use Aiursoft.CanonQueue

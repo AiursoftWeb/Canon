@@ -18,7 +18,6 @@ public class CanonQueue : ISingletonDependency
     private readonly SafeQueue<Func<Task>> _pendingTaskFactories = new();
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly object _loc = new();
-    public Task Engine = Task.CompletedTask;
 
     public CanonQueue(
         IServiceScopeFactory serviceScopeFactory,
@@ -27,6 +26,8 @@ public class CanonQueue : ISingletonDependency
         _scopeFactory = serviceScopeFactory;
         _logger = logger;
     }
+
+    public Task Engine { get; private set; } = Task.CompletedTask;
 
     /// <summary>
     /// Adds a new task to the queue.
