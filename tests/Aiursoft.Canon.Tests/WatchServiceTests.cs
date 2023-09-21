@@ -40,10 +40,7 @@ public class WatchServiceTests
 	{
 		var watch = _serviceProvider!.GetRequiredService<WatchService>();
 		var demo = _serviceProvider!.GetRequiredService<DemoService>();
-        await watch.RunWithWatchAsync(async () =>
-        {
-			await demo.DoSomethingSlowAsync();
-		});
+        await watch.RunWithWatchAsync(demo.DoSomethingSlowAsync);
 
 		Assert.IsTrue(DemoService.DoneAsync);
 	}
