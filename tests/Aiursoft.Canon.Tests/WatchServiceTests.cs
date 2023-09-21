@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Diagnostics;
 
 namespace Aiursoft.Canon.Tests;
 
