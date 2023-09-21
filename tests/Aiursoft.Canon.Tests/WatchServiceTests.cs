@@ -40,8 +40,22 @@ public class WatchServiceTests
 	{
 		var watch = _serviceProvider!.GetRequiredService<WatchService>();
 		var demo = _serviceProvider!.GetRequiredService<DemoService>();
-        await watch.RunWithWatchAsync(demo.DoSomethingSlowAsync);
+		var time = await watch.RunWithWatchAsync(demo.DoSomethingSlowAsync);
+		Assert.IsTrue(time > TimeSpan.FromMilliseconds(200));
+		Assert.IsTrue(DemoService.DoneAsync);
+	}
 
+	[TestMethod]
+	public async Task TestWatchWithResponse()
+	{
+		var watch = _serviceProvider!.GetRequiredService<WatchService>();
+		var demo = _serviceProvider!.GetRequiredService<DemoService>();
+		var (time, _) = await watch.RunWithWatchAsync(async () => 
+		{
+			await demo.DoSomethingSlowAsync();
+			return 0;
+		});
+		Assert.IsTrue(time > TimeSpan.FromMilliseconds(200));
 		Assert.IsTrue(DemoService.DoneAsync);
 	}
 }
