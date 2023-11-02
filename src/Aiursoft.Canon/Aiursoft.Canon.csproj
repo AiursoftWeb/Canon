@@ -1,28 +1,30 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <OutputType>Library</OutputType>
-        <Version>7.0.4</Version>
-        <TargetFramework>net7.0</TargetFramework>
-        <AssemblyName>Aiursoft.Canon</AssemblyName>
-        <RootNamespace>Aiursoft.Canon</RootNamespace>
-        <IsTestProject>false</IsTestProject>
-        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-        <IsPackable>true</IsPackable>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <Company>Aiursoft</Company>
-        <Product>Canon</Product>
-        <Authors>anduin</Authors>
-        <Description>Task fire and forget framework</Description>
-        <PackageId>Aiursoft.Canon</PackageId>
-        <PackageTags>task asp.net fire-and-forget task-pool</PackageTags>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <PackageProjectUrl>https://gitlab.aiursoft.cn/Aiursoft/Canon</PackageProjectUrl>
-        <RepositoryType>git</RepositoryType>
-        <RepositoryUrl>https://gitlab.aiursoft.cn/Aiursoft/Canon.git</RepositoryUrl>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="Aiursoft.Scanner.Abstractions" Version="7.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
-    </ItemGroup>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <Version>7.0.5</Version>
+    <TargetFramework>net7.0</TargetFramework>
+    <AssemblyName>Aiursoft.Canon</AssemblyName>
+    <RootNamespace>Aiursoft.Canon</RootNamespace>
+    <IsTestProject>false</IsTestProject>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Company>Aiursoft</Company>
+    <Product>Canon</Product>
+    <Authors>anduin</Authors>
+    <Description>Task fire and forget framework</Description>
+    <PackageId>Aiursoft.Canon</PackageId>
+    <PackageTags>task asp.net fire-and-forget task-pool</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://gitlab.aiursoft.cn/Aiursoft/Canon</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://gitlab.aiursoft.cn/Aiursoft/Canon.git</RepositoryUrl>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Aiursoft.Scanner.Abstractions" Version="7.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
+    <None Include="../../Readme.md" Pack="true" PackagePath="." />
+  </ItemGroup>
 </Project>
