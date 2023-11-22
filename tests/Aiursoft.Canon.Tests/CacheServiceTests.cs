@@ -54,7 +54,7 @@ public async Task RunWithCache_ReturnsFallbackValue_WhenCacheIsExpired()
     var memoryCacheOptions = new MemoryCacheOptions();
     var memoryCache = new MemoryCache(memoryCacheOptions);
     memoryCache.Set(cacheKey, cacheValue, TimeSpan.FromMilliseconds(1));
-    await Task.Delay(1);
+    await Task.Delay(10);
     var cacheService = new CacheService(memoryCache, _logger);
 
     // Act
@@ -108,7 +108,7 @@ public async Task QueryCacheWithSelector_ReturnsFallbackValue_WhenCacheIsExpired
     var memoryCacheOptions = new MemoryCacheOptions();
     var memoryCache = new MemoryCache(memoryCacheOptions);
     memoryCache.Set(cacheKey, cacheValue, TimeSpan.FromMilliseconds(1));
-    await Task.Delay(1);
+    await Task.Delay(10);
     var cacheService = new CacheService(memoryCache, _logger);
 
     // Act

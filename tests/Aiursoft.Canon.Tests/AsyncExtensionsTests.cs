@@ -1,0 +1,30 @@
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace Aiursoft.Canon.Tests;
+
+[TestClass]
+public class AsyncExtensionsTests
+{
+    [TestMethod]
+    public async Task TestCanonAsync()
+    {
+        var fibonacci = FibonacciAsync();
+        var top100 = fibonacci.Take(30);
+        var result = top100.ToListAsync();
+        Assert.AreEqual(30, (await result).Count);
+    }
+    
+    private async IAsyncEnumerable<int> FibonacciAsync()
+    {
+        int current = 1, next = 1;
+
+        while (true) 
+        {
+            await Task.Delay(1);
+            yield return current;
+            next = current + (current = next);
+        }
+        
+        // ReSharper disable once IteratorNeverReturns
+    }
+}
