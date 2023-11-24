@@ -4,7 +4,7 @@
 [![Pipeline stat](https://gitlab.aiursoft.cn/aiursoft/canon/badges/master/pipeline.svg)](https://gitlab.aiursoft.cn/aiursoft/canon/-/pipelines)
 [![Test Coverage](https://gitlab.aiursoft.cn/aiursoft/canon/badges/master/coverage.svg)](https://gitlab.aiursoft.cn/aiursoft/canon/-/pipelines)
 [![NuGet version (Aiursoft.Canon)](https://img.shields.io/nuget/v/Aiursoft.Canon.svg)](https://www.nuget.org/packages/Aiursoft.Canon/)
-[![ManHours](https://manhours.aiursoft.cn/gitlab/gitlab.aiursoft.cn/aiursoft/canon.svg)](https://gitlab.aiursoft.cn/aiursoft/canon/-/commits/master?ref_type=heads)
+[![ManHours](https://manhours.aiursoft.cn/r/gitlab.aiursoft.cn/aiursoft/canon.svg)](https://gitlab.aiursoft.cn/aiursoft/canon/-/commits/master?ref_type=heads)
 
 Aiursoft Canon is used to implement dependency-based Fire and Forget for .NET projects, which means starting a heavy task without waiting for it to complete or caring about its success, and continuing with subsequent logic.
 
