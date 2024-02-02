@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <Version>7.0.7</Version>
+    <Version>7.0.8</Version>
     <TargetFramework>net7.0</TargetFramework>
     <AssemblyName>Aiursoft.Canon</AssemblyName>
     <RootNamespace>Aiursoft.Canon</RootNamespace>
@@ -23,7 +23,7 @@
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Aiursoft.Scanner.Abstractions" Version="7.0.1" />
+    <PackageReference Include="Aiursoft.Scanner.Abstractions" Version="7.0.2" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
     <None Include="../../Readme.md" Pack="true" PackagePath="." />
   </ItemGroup>
