@@ -2,23 +2,23 @@
 
 public class SafeQueue<T>
 {
-    private readonly object loc = new();
-    private readonly Queue<T> queue = new();
+    private readonly object _loc = new();
+    private readonly Queue<T> _queue = new();
 
     public void Enqueue(T item)
     {
-        lock (loc)
+        lock (_loc)
         {
-            queue.Enqueue(item);
+            _queue.Enqueue(item);
         }
     }
 
     public T Dequeue()
     {
         T item;
-        lock (loc)
+        lock (_loc)
         {
-            item = queue.Dequeue();
+            item = _queue.Dequeue();
         }
 
         return item;
@@ -27,9 +27,9 @@ public class SafeQueue<T>
     public bool Any()
     {
         bool any;
-        lock (loc)
+        lock (_loc)
         {
-            any = queue.Any();
+            any = _queue.Any();
         }
 
         return any;
@@ -38,9 +38,9 @@ public class SafeQueue<T>
     public int Count()
     {
         int count;
-        lock (loc)
+        lock (_loc)
         {
-            count = queue.Count;
+            count = _queue.Count;
         }
 
         return count;
