@@ -62,7 +62,7 @@ public class CacheService : ITransientDependency
 
                 _cache.Set(cacheKey, resultValue, cacheEntryOptions);
                 _logger.LogTrace("Cache set for {CachedMinutes} minutes with cached key: {CacheKey}",
-                    cachedMinutes, cacheKey);
+                    minutesShouldCache, cacheKey);
             }
         }
         else
@@ -113,7 +113,7 @@ public class CacheService : ITransientDependency
 
                 _cache.Set(cacheKey, resultValue, cacheEntryOptions);
                 _logger.LogTrace("Cache set for {CachedMinutes} minutes with cached key: {CacheKey}",
-                    cachedMinutes, cacheKey);
+                    minutesShouldCache, cacheKey);
             }
         }
         else
