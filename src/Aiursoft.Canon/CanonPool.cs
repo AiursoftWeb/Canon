@@ -11,15 +11,9 @@ namespace Aiursoft.Canon;
 ///
 /// This service shall be used from dependency injection and is a transient pool, used for replacement for 'Task.WhenAll()'.
 /// </summary>
-public class CanonPool : ITransientDependency
+public class CanonPool(ILogger<CanonPool> logger) : ITransientDependency
 {
-    private readonly ILogger<CanonPool> _logger;
     private readonly SafeQueue<Func<Task>> _pendingTaskFactories = new();
-
-    public CanonPool(ILogger<CanonPool> logger)
-    {
-        _logger = logger;
-    }
 
     /// <summary>
     /// Adds a new task to the queue. (This will NOT run the task!) Call 'await RunAllInPoolAsync()' to run.
@@ -44,13 +38,13 @@ public class CanonPool : ITransientDependency
             {
                 var taskFactory = _pendingTaskFactories.Dequeue();
                 tasksInFlight.Add(taskFactory());
-                _logger?.LogDebug(
+                logger?.LogDebug(
                     "Engine selected one job to run. Currently there are still {Remaining} jobs remaining. {InFlight} jobs running", _pendingTaskFactories.Count(), tasksInFlight.Count);
             }
 
             var completedTask = await Task.WhenAny(tasksInFlight).ConfigureAwait(false);
             await completedTask.ConfigureAwait(false);
-            _logger?.LogTrace(
+            logger?.LogTrace(
                 "Engine finished one job. Currently there are still {Remaining} jobs remaining. {InFlight} jobs running", _pendingTaskFactories.Count(), tasksInFlight.Count);
             tasksInFlight.Remove(completedTask);
         }

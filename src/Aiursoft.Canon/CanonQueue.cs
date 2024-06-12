@@ -12,20 +12,13 @@ namespace Aiursoft.Canon;
 ///
 /// This service shall be used from dependency injection and is an application wide global queue, used for fire and forget.
 /// </summary>
-public class CanonQueue : ISingletonDependency
+public class CanonQueue(
+    IServiceScopeFactory serviceScopeFactory,
+    ILogger<CanonQueue> logger)
+    : ISingletonDependency
 {
-    private readonly ILogger<CanonQueue> _logger;
     private readonly SafeQueue<Func<Task>> _pendingTaskFactories = new();
-    private readonly IServiceScopeFactory _scopeFactory;
     private readonly object _loc = new();
-
-    public CanonQueue(
-        IServiceScopeFactory serviceScopeFactory,
-        ILogger<CanonQueue> logger)
-    {
-        _scopeFactory = serviceScopeFactory;
-        _logger = logger;
-    }
 
     public Task Engine { get; private set; } = Task.CompletedTask;
 
@@ -50,7 +43,7 @@ public class CanonQueue : ISingletonDependency
                 return;
             }
 
-            _logger.LogDebug("Engine is sleeping. Trying to wake it up");
+            logger.LogDebug("Engine is sleeping. Trying to wake it up");
             Engine = RunTasksInQueue(maxThreads);
         }
     }
@@ -65,7 +58,7 @@ public class CanonQueue : ISingletonDependency
     {
         QueueNew(async () =>
         {
-            using (var scope = _scopeFactory.CreateScope())
+            using (var scope = serviceScopeFactory.CreateScope())
             {
                 var dependency = scope.ServiceProvider.GetRequiredService<T>();
                 try
@@ -74,7 +67,7 @@ public class CanonQueue : ISingletonDependency
                 }
                 catch (Exception e)
                 {
-                    _logger.LogCritical(e, "An error occurred with a Canon task with dependency: '{Dependency}'", typeof(T).Name);
+                    logger.LogCritical(e, "An error occurred with a Canon task with dependency: '{Dependency}'", typeof(T).Name);
                 }
                 finally
                 {
@@ -98,13 +91,13 @@ public class CanonQueue : ISingletonDependency
             {
                 var taskFactory = _pendingTaskFactories.Dequeue();
                 tasksInFlight.Add(taskFactory());
-                _logger.LogDebug(
+                logger.LogDebug(
                     "Engine selected one job to run. Currently there are still {Remaining} jobs remaining. {InFlight} jobs running", _pendingTaskFactories.Count(), tasksInFlight.Count);
             }
 
             var completedTask = await Task.WhenAny(tasksInFlight).ConfigureAwait(false);
             await completedTask.ConfigureAwait(false);
-            _logger.LogTrace(
+            logger.LogTrace(
                 "Engine finished one job. Currently there are still {Remaining} jobs remaining. {InFlight} jobs running", _pendingTaskFactories.Count(), tasksInFlight.Count);
             tasksInFlight.Remove(completedTask);
         }

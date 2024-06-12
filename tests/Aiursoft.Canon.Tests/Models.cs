@@ -18,24 +18,18 @@ public class SqlDbContext : DbContext
     }
 }
 
-internal class DemoService
+internal class DemoService(SqlDbContext dbContext)
 {
     public static bool Done;
     public static bool DoneAsync;
     public static int DoneTimes;
     private static readonly object Loc = new();
-    private readonly SqlDbContext _dbContext;
-
-    public DemoService(SqlDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
 
     public void DoSomethingSlow()
     {
         Done = false;
         Thread.Sleep(200);
-        var _ = _dbContext.Records.ToList();
+        var _ = dbContext.Records.ToList();
         Done = true;
     }
 
@@ -43,8 +37,8 @@ internal class DemoService
     {
         DoneAsync = false;
         await Task.Delay(200);
-        _dbContext.Records.Add(new InDbEntity { Content = "Test", Filter = "Test" });
-        await _dbContext.SaveChangesAsync();
+        dbContext.Records.Add(new InDbEntity { Content = "Test", Filter = "Test" });
+        await dbContext.SaveChangesAsync();
         DoneAsync = true;
         lock (Loc)
         {
@@ -53,34 +47,25 @@ internal class DemoService
     }
 }
 
-public class DemoController
+public class DemoController(
+    CanonService canonService,
+    CanonQueue canonQueue)
 {
-    private readonly CanonQueue _canonQueue;
-    private readonly CanonService _canonService;
-
-    public DemoController(
-        CanonService canonService,
-        CanonQueue canonQueue)
-    {
-        _canonService = canonService;
-        _canonQueue = canonQueue;
-    }
-
     public void DemoAction()
     {
-        _canonService.Fire<DemoService>(d => d.DoSomethingSlow());
+        canonService.Fire<DemoService>(d => d.DoSomethingSlow());
     }
 
     public void DemoActionAsync()
     {
-        _canonService.FireAsync<DemoService>(d => d.DoSomethingSlowAsync());
+        canonService.FireAsync<DemoService>(d => d.DoSomethingSlowAsync());
     }
 
     public void QueueActionAsync()
     {
         for (var i = 0; i < 32; i++)
         {
-            _canonQueue.QueueWithDependency<DemoService>(d => d.DoSomethingSlowAsync());
+            canonQueue.QueueWithDependency<DemoService>(d => d.DoSomethingSlowAsync());
         }
     }
 }
