@@ -34,7 +34,7 @@ public class CacheService : ITransientDependency
     /// <param name="cacheCondition">An optional predicate used to determine if the cached data is still valid.</param>
     /// <param name="cachedMinutes">The number of minutes to cache the data for.</param>
     /// <returns>The cached data, or the result of the fallback function if the data is not available in the cache.</returns>
-    public async Task<T?> RunWithCache<T>(
+    public async Task<T> RunWithCache<T>(
         string cacheKey,
         Func<Task<T>> fallback,
         Predicate<T>? cacheCondition = null,
@@ -49,11 +49,6 @@ public class CacheService : ITransientDependency
             cachedMinutes(resultValue) <= TimeSpan.Zero)
         {
             resultValue = await fallback();
-            if (resultValue == null)
-            {
-                return default;
-            }
-
             var minutesShouldCache = cachedMinutes(resultValue);
             if (minutesShouldCache > TimeSpan.Zero && cacheCondition(resultValue))
             {
