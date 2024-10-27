@@ -44,7 +44,11 @@ public class CanonQueue(
             }
 
             logger.LogDebug("Engine is sleeping. Trying to wake it up");
-            Engine = RunTasksInQueue(maxThreads);
+            Engine = Task.Run(async () =>
+            {
+                await RunTasksInQueue(maxThreads);
+                logger.LogDebug("Engine finished all jobs. Going to sleep.");
+            });
         }
     }
 
@@ -58,21 +62,19 @@ public class CanonQueue(
     {
         QueueNew(async () =>
         {
-            using (var scope = serviceScopeFactory.CreateScope())
+            using var scope = serviceScopeFactory.CreateScope();
+            var dependency = scope.ServiceProvider.GetRequiredService<T>();
+            try
             {
-                var dependency = scope.ServiceProvider.GetRequiredService<T>();
-                try
-                {
-                    await bullet(dependency);
-                }
-                catch (Exception e)
-                {
-                    logger.LogCritical(e, "An error occurred with a Canon task with dependency: '{Dependency}'", typeof(T).Name);
-                }
-                finally
-                {
-                    (dependency as IDisposable)?.Dispose();
-                }
+                await bullet(dependency);
+            }
+            catch (Exception e)
+            {
+                logger.LogCritical(e, "An error occurred with a Canon task with dependency: '{Dependency}'", typeof(T).Name);
+            }
+            finally
+            {
+                (dependency as IDisposable)?.Dispose();
             }
         }, startTheEngine);
     }
