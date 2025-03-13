@@ -23,7 +23,7 @@ _ = Task.Run(() =>
 
 However, if your task depends on something like Entity Framework, it's hard to control it's life cycle.
 
-## Installation
+## How to install
 
 First, install `Aiursoft.Canon` to your ASP.NET Core project from [nuget.org](https://www.nuget.org/packages/Aiursoft.Canon/):
 
