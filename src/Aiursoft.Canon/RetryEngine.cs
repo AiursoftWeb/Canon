@@ -43,6 +43,11 @@ public class RetryEngine : ITransientDependency
                 var response = await taskFactory(i);
                 return response;
             }
+            catch (TaskCanceledException)
+            {
+                // This is a special case. We don't want to retry when the task is cancelled.
+                throw;
+            }
             catch (Exception e)
             {
                 onError?.Invoke(e);
