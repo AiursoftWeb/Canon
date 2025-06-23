@@ -6,7 +6,7 @@ namespace Aiursoft.Canon;
 
 /// <summary>
 /// A transient service to replace 'Task.WhenAll()'.
-/// 
+///
 /// Implements a task queue that can be used to add tasks to a queue and execute them with a specified degree of parallelism.
 ///
 /// This service shall be used from dependency injection and is a transient pool, used for replacement for 'Task.WhenAll()'.
@@ -31,6 +31,11 @@ public class CanonPool(ILogger<CanonPool> logger) : ITransientDependency
     /// <returns>A task that represents the completion of all the tasks in the queue.</returns>
     public async Task RunAllTasksInPoolAsync(int maxDegreeOfParallelism = 8)
     {
+        if (maxDegreeOfParallelism <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(maxDegreeOfParallelism), "Max degree of parallelism must be greater than 0.");
+        }
+
         var tasksInFlight = new List<Task>(maxDegreeOfParallelism);
         while (_pendingTaskFactories.Any() || tasksInFlight.Any())
         {

@@ -7,7 +7,7 @@ namespace Aiursoft.Canon;
 
 /// <summary>
 /// Application singleton background job queue.
-/// 
+///
 /// Implements a task queue that can be used to add tasks to a queue and execute them with a specified degree of parallelism.
 ///
 /// This service shall be used from dependency injection and is an application wide global queue, used for fire and forget.
@@ -86,6 +86,11 @@ public class CanonQueue(
     /// <returns>A task that represents the completion of all the tasks in the queue.</returns>
     public async Task RunTasksInQueue(int maxDegreeOfParallelism)
     {
+        if (maxDegreeOfParallelism <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(maxDegreeOfParallelism), "Max degree of parallelism must be greater than 0.");
+        }
+
         var tasksInFlight = new List<Task>(maxDegreeOfParallelism);
         while (_pendingTaskFactories.Any() || tasksInFlight.Any())
         {
