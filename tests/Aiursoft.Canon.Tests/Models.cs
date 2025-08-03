@@ -1,10 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace Aiursoft.Canon.Tests;
+
 public class InDbEntity
 {
     public int Id { get; set; }
+
+    [MaxLength(100)]
     public string? Content { get; set; }
+
+    [MaxLength(100)]
     public string? Filter { get; set; }
 }
 
