@@ -13,10 +13,10 @@ public class RetryEngineTests
     {
         var engine = new RetryEngine(_logger);
 
-        await Assert.ThrowsExceptionAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() =>
             engine.RunWithRetry<int>(_ => throw new InvalidOperationException("Test exception"), attempts: 3));
     }
-    
+
     [TestMethod]
     public async Task RunWithRetryWithoutResponse_ReturnsResultOnSuccess()
     {
@@ -50,7 +50,7 @@ public class RetryEngineTests
 
         Assert.AreEqual(42, result);
     }
-    
+
     [TestMethod]
     public async Task RunWithRetry_ShouldNotRetry()
     {
@@ -67,8 +67,8 @@ public class RetryEngineTests
                         throw new BadImageFormatException("Test BadImageFormatException");
                     }
                     throw new WebException("Test exception");
-                }, 
-                attempts: int.MaxValue, 
+                },
+                attempts: int.MaxValue,
                 when: e => e is BadImageFormatException);
             Assert.Fail("Should not success!");
         }
