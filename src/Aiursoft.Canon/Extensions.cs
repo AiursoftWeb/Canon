@@ -6,7 +6,7 @@ public static class Extensions
 {
     /// <summary>
     /// Register task canon tasks.
-    /// 
+    ///
     /// (If your project is using Aiursoft.Scanner, you do NOT have to call this!)
     /// </summary>
     /// <param name="services">Services to be injected.</param>
@@ -24,6 +24,9 @@ public static class Extensions
             services.AddMemoryCache();
         }
         services.AddTransient<CacheService>();
+
+        // A transient service to throw an exception if the task takes too long.
+        services.AddTransient<TimeoutStopper>();
 
         // A transient service to replace 'Task.WhenAll()'.
         services.AddTransient<CanonPool>();

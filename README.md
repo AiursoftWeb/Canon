@@ -42,35 +42,40 @@ services.AddTaskCanon();
 Your project will get:
 
 ```csharp
-// An easier to use Cache service. Allow you to execute some code with a key to cache it.
-services.AddTransient<CacheService>();
-
-// A transient service to retry a task with limited times.
+// A retry engine.
 services.AddTransient<RetryEngine>();
 
-// A transient service to replace 'Task.WhenAll()'. Start all tasks with limited concurrency.
+// An easier to use Cache service.
+services.AddTransient<CacheService>();
+
+// A transient service to throw an exception if the task takes too long.
+services.AddTransient<TimeoutStopper>();
+
+// A transient service to replace 'Task.WhenAll()'.
 services.AddTransient<CanonPool>();
 
-// Simple Fire and forget service that runs immediately. (No concurrency limitation)
+// Simple Fire and forget service that runs immediately.
 services.AddSingleton<CanonService>();
 
-// Application singleton background job queue. (Default task concurrency is 8)
+// Application singleton background job queue.
 services.AddSingleton<CanonQueue>();
 
 // A watch service to measure how much time a task used.
 services.AddTransient<WatchService>();
 ```
 
+---
+
 ### How to use Aiursoft.CanonQueue
 
-Then, you can inject `CanonService` to your controller. And now, you can fire and forget your task like this:
+Then, you can inject `CanonQueue` to your controller. And now, you can fire and forget your task like this:
 
 ```csharp
 public class YourController : Controller
 {
     private readonly CanonQueue _canonQueue;
 
-    public OAuthController(CanonQueue canonQueue)
+    public YourController(CanonQueue canonQueue)
     {
         _canonQueue = canonQueue;
     }
@@ -90,11 +95,13 @@ public class YourController : Controller
 
 That's it.
 
+-----
+
 ### How to use Aiursoft.CanonPool
 
 You can also put all your tasks to a task queue, and run those tasks with a limit of concurrency:
 
-Inject CanonPool first:
+Inject `CanonPool` first:
 
 ```csharp
 private readonly EmailSender _sender;
@@ -109,19 +116,22 @@ public DemoController(
 }
 ```
 
+Now you can register tasks to the pool and run them concurrently with a controlled limit.
+
 ```csharp
 foreach (var user in users)
 {
     _canonPool.RegisterNewTaskToPool(async () =>
     {
-        await sender.SendAsync(user); // Which may be slow.
+        await _sender.SendAsync(user); // Which may be slow.
     });
 }
 
-await _canonPool.RunAllTasksInPoolAsync(); // Execute tasks in pool, running tasks should be max at 8.
+// Execute tasks in pool, with a maximum of 8 running at the same time.
+await _canonPool.RunAllTasksInPoolAsync(); 
 ```
 
-That is far better than this:
+This is far better than this:
 
 ```csharp
 var tasks = new List<Task>();
@@ -129,13 +139,142 @@ foreach (var user in users)
 {
     tasks.Add(Task.Run(() => sender.SendAsync(user)));
 }
-await Task.WhenAll(tasks); // It may start too many tasks and block your remote service like email sender.
+// This may start too many tasks at once and overload your remote service.
+await Task.WhenAll(tasks); 
 ```
 
-Now you can control the concurrency of your tasks. For example, you can start 16 tasks at the same time:
+You can control the concurrency of your tasks. For example, you can start 16 tasks at the same time:
 
 ```csharp
-await _canonQueue.RunTasksInQueue(16); // Start the engine with 16 concurrency and wait for all tasks to complete.
+await _canonPool.RunAllTasksInPoolAsync(16); // Start the engine with 16 concurrency.
 ```
 
 That helps you to avoid blocking your Email sender or database with too many tasks.
+
+-----
+
+### How to use Aiursoft.RetryEngine
+
+The `RetryEngine` is useful for automatically retrying an operation that might fail, such as a network request. It uses an exponential backoff strategy to wait between retries.
+
+First, inject `RetryEngine` into your service or controller:
+
+```csharp
+private readonly RetryEngine _retry;
+
+public MyService(RetryEngine retry)
+{
+    _retry = retry;
+}
+```
+
+Now, you can wrap a potentially failing task with `RunWithRetry`.
+
+```csharp
+public async Task<string> CallUnreliableApiService()
+{
+    var result = await _retry.RunWithRetry(async (attempt) => 
+    {
+        // This code will be executed up to 5 times.
+        Console.WriteLine($"Trying to call the API, attempt {attempt}...");
+        var client = new HttpClient();
+        var response = await client.GetStringAsync("https://example.com/api/data");
+        return response;
+    }, 
+    attempts: 5, 
+    when: e => e is HttpRequestException); // Only retry on HttpRequestException.
+
+    return result;
+}
+```
+
+If the API call fails with an `HttpRequestException`, the `RetryEngine` will wait for a short, random duration (which increases after each failure) and then try again. If it fails 5 times, the exception will be re-thrown.
+
+-----
+
+### How to use Aiursoft.CacheService
+
+`CacheService` provides a simple way to cache results from expensive operations in memory, reducing redundant calls.
+
+Inject `CacheService` where you need it:
+
+```csharp
+private readonly CacheService _cache;
+private readonly MyDbContext _dbContext;
+
+public MyController(
+    CacheService cache,
+    MyDbContext dbContext)
+{
+    _cache = cache;
+    _dbContext = dbContext;
+}
+```
+
+Use `RunWithCache` to get data. It will first try to find the data in the cache. If it's not there, it will execute your fallback function, cache the result, and then return it.
+
+```csharp
+public async Task<IActionResult> GetDashboard()
+{
+    // Define a unique key for this cache entry.
+    var cacheKey = "dashboard-stats";
+
+    // This data will be cached for 10 minutes.
+    var stats = await _cache.RunWithCache(cacheKey, async () => 
+    {
+        // This logic only runs if the cache is empty or expired.
+        // It's an expensive database query.
+        return await _dbContext.Statistics.SumAsync(t => t.Value);
+    },
+    cachedMinutes: _ => TimeSpan.FromMinutes(10));
+
+    return View(stats);
+}
+```
+
+The next time `GetDashboard` is called within 10 minutes, the expensive database query will be skipped, and the result will be served directly from the in-memory cache.
+
+-----
+
+### How to use Aiursoft.TimeoutStopper
+
+`TimeoutStopper` allows you to run a task with a specified time limit. If the task doesn't complete within the timeout, a `TimeoutException` is thrown. This is useful for preventing long-running operations from blocking your application indefinitely.
+
+Inject `TimeoutStopper` into your class:
+
+```csharp
+private readonly TimeoutStopper _timeoutStopper;
+
+public MyProcessor(TimeoutStopper timeoutStopper)
+{
+    _timeoutStopper = timeoutStopper;
+}
+```
+
+Wrap your long-running task with `RunWithTimeout`.
+
+```csharp
+public async Task ProcessDataWithDeadline()
+{
+    try
+    {
+        // We give this operation a 5-second deadline.
+        await _timeoutStopper.RunWithTimeout(async (cancellationToken) =>
+        {
+            // Simulate a very long-running process.
+            Console.WriteLine("Starting a heavy computation...");
+            await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
+            Console.WriteLine("Computation finished."); // This line will not be reached.
+
+        }, timeoutInSeconds: 5);
+    }
+    catch (TimeoutException ex)
+    {
+        Console.WriteLine(ex.Message); // "The operation timed out after 5 seconds."
+        // Handle the timeout case, e.g., log an error or notify the user.
+    }
+}
+```
+
+In this example, `Task.Delay` simulates a 10-second task. Because the timeout is set to 5 seconds, the `TimeoutStopper` will throw a `TimeoutException` before the task can complete.
+
