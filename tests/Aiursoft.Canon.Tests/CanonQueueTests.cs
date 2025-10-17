@@ -49,8 +49,8 @@ public class CanonQueueTests
         stopwatch.Start();
         controller?.QueueActionAsync();
         stopwatch.Stop();
-        Assert.IsTrue(stopwatch.ElapsedMilliseconds < 1000, "Demo action should finish very fast.");
-        Assert.AreEqual(false, DemoService.DoneAsync, "When demo action finished, work is not over yet.");
+        Assert.IsLessThan(1000, stopwatch.ElapsedMilliseconds, "Demo action should finish very fast.");
+        Assert.IsFalse(DemoService.DoneAsync, "When demo action finished, work is not over yet.");
 
         stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -61,6 +61,6 @@ public class CanonQueueTests
                 $"Waited for {stopwatch.Elapsed}. And {DemoService.DoneTimes} tasks are finished.");
         }
         stopwatch.Stop();
-        Assert.IsTrue(stopwatch.ElapsedMilliseconds < 5000, "All actions should finish in 5 seconds.");
+        Assert.IsLessThan(5000, stopwatch.ElapsedMilliseconds, "All actions should finish in 5 seconds.");
     }
 }

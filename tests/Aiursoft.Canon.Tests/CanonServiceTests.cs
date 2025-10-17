@@ -39,10 +39,10 @@ public class CanonServiceTests
         stopwatch.Start();
         controller?.DemoAction();
         stopwatch.Stop();
-        Assert.IsTrue(stopwatch.ElapsedMilliseconds < 1000, "Demo action should finish very fast.");
-        Assert.AreEqual(false, DemoService.Done, "When demo action finished, work is not over yet.");
+        Assert.IsLessThan(1000, stopwatch.ElapsedMilliseconds, "Demo action should finish very fast.");
+        Assert.IsFalse(DemoService.Done, "When demo action finished, work is not over yet.");
         await Task.Delay(2000);
-        Assert.AreEqual(true, DemoService.Done, "After a while, the async job is done.");
+        Assert.IsTrue(DemoService.Done, "After a while, the async job is done.");
     }
 
     [TestMethod]
@@ -53,9 +53,9 @@ public class CanonServiceTests
         stopwatch.Start();
         controller?.DemoActionAsync();
         stopwatch.Stop();
-        Assert.IsTrue(stopwatch.ElapsedMilliseconds < 1000, "Demo action should finish very fast.");
-        Assert.AreEqual(false, DemoService.DoneAsync, "When demo action finished, work is not over yet.");
+        Assert.IsLessThan(1000, stopwatch.ElapsedMilliseconds, "Demo action should finish very fast.");
+        Assert.IsFalse(DemoService.DoneAsync, "When demo action finished, work is not over yet.");
         await Task.Delay(600);
-        Assert.AreEqual(true, DemoService.DoneAsync, "After a while, the async job is done.");
+        Assert.IsTrue(DemoService.DoneAsync, "After a while, the async job is done.");
     }
 }

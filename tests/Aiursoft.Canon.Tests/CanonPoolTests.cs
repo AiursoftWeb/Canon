@@ -57,7 +57,7 @@ public class CanonPoolTests
         await pool?.RunAllTasksInPoolAsync(maxDegreeOfParallelism)!;
 
         // Assert
-        Assert.AreEqual(10, tasksExecuted.Count);
+        Assert.HasCount(10, tasksExecuted);
         for (int i = 0; i < 10; i++)
         {
             Assert.AreEqual(i, tasksExecuted[i]);

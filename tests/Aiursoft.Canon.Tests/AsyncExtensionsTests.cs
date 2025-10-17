@@ -9,7 +9,7 @@ public class AsyncExtensionsTests
         var fibonacci = FibonacciAsync();
         var top100 = fibonacci.Take(30);
         var result = top100.ToListAsync();
-        Assert.AreEqual(30, (await result).Count);
+        Assert.HasCount(30, await result);
     }
 
     private async IAsyncEnumerable<int> FibonacciAsync()
