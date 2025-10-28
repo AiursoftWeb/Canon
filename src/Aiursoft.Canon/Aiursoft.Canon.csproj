@@ -17,9 +17,9 @@
     <PackageId>Aiursoft.Canon</PackageId>
     <PackageTags>task asp.net fire-and-forget task-pool</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://gitlab.aiursoft.cn/Aiursoft/Canon</PackageProjectUrl>
+    <PackageProjectUrl>https://gitlab.aiursoft.com/Aiursoft/Canon</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://gitlab.aiursoft.cn/Aiursoft/Canon.git</RepositoryUrl>
+    <RepositoryUrl>https://gitlab.aiursoft.com/Aiursoft/Canon.git</RepositoryUrl>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
