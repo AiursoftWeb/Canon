@@ -1,4 +1,6 @@
-﻿namespace Aiursoft.Canon.Tests;
+﻿[assembly:DoNotParallelize]
+
+namespace Aiursoft.Canon.Tests;
 
 [TestClass]
 public class AsyncExtensionsTests
