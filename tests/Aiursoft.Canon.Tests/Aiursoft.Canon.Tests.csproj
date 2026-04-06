@@ -20,9 +20,6 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.5" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Aiursoft.Canon\Aiursoft.Canon.csproj" />
-    <ProjectReference Include="..\..\src\Aiursoft.Canon.ServiceTaskQueue\Aiursoft.Canon.ServiceTaskQueue.csproj" />
-    <ProjectReference Include="..\..\src\Aiursoft.Canon.BackgroundJobs\Aiursoft.Canon.BackgroundJobs.csproj" />
     <ProjectReference Include="..\..\src\Aiursoft.Canon.ScheduledTasks\Aiursoft.Canon.ScheduledTasks.csproj" />
   </ItemGroup>
 </Project>

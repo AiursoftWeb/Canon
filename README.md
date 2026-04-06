@@ -10,6 +10,19 @@ Aiursoft Canon is used to implement dependency-based Fire and Forget for .NET pr
 
 This is very useful in many scenarios to avoid blocking, such as when sending emails.
 
+## Table of Contents
+
+- [Part 1: Core Toolkit](#part-1-core-toolkit)
+  - [CanonQueue — Fire and Forget](#how-to-use-aiursoftcanonqueue)
+  - [CanonPool — Bounded Concurrency](#how-to-use-aiursoftcanonpool)
+  - [RetryEngine — Automatic Retry](#how-to-use-aiursoftretryengine)
+  - [CacheService — In-Memory Cache](#how-to-use-aiursoftcacheservice)
+  - [TimeoutStopper — Deadline Enforcement](#how-to-use-aiursofttimeoutstopper)
+- [Part 2: Background Job Framework](#part-2-background-job-framework)
+  - [Layer 1 — ServiceTaskQueue](#layer-1--aiursoftcanonservicetaskqueue)
+  - [Layer 2 — BackgroundJobs](#layer-2--aiursoftcanonbackgroundjobs)
+  - [Layer 3 — ScheduledTasks](#layer-3--aiursoftcanonscheduledtasks)
+
 ## Why this project
 
 The traditional way to fire and forget in C# is:
@@ -37,34 +50,23 @@ Add the service to your [`IServiceCollection`](https://learn.microsoft.com/en-us
 using Aiursoft.Canon;
 
 services.AddTaskCanon();
-```
 
-Your project will get:
+/* Under the hood, this single line registers everything you need — you do NOT
+   need to copy any of these manually:
 
-```csharp
-// A retry engine.
-services.AddTransient<RetryEngine>();
-
-// An easier to use Cache service.
-services.AddTransient<CacheService>();
-
-// A transient service to throw an exception if the task takes too long.
-services.AddTransient<TimeoutStopper>();
-
-// A transient service to replace 'Task.WhenAll()'.
-services.AddTransient<CanonPool>();
-
-// Simple Fire and forget service that runs immediately.
-services.AddSingleton<CanonService>();
-
-// Application singleton background job queue.
-services.AddSingleton<CanonQueue>();
-
-// A watch service to measure how much time a task used.
-services.AddTransient<WatchService>();
+   services.AddTransient<RetryEngine>();     // exponential-backoff retry
+   services.AddTransient<CacheService>();    // in-memory cache helper
+   services.AddTransient<TimeoutStopper>();  // deadline enforcement
+   services.AddTransient<CanonPool>();       // bounded-concurrency pool (Transient)
+   services.AddSingleton<CanonService>();    // simple fire-and-forget
+   services.AddSingleton<CanonQueue>();      // DI-scoped background queue
+   services.AddTransient<WatchService>();    // execution-time measurement
+*/
 ```
 
 ---
+
+## Part 1: Core Toolkit
 
 ### How to use Aiursoft.CanonQueue
 
@@ -82,12 +84,16 @@ public class YourController : Controller
 
     public IActionResult Send()
     {
-        // Send an confirmation email here:
+        // Canon automatically creates a new IServiceScope for every background task.
+        // It is 100% safe to use Scoped services (e.g. EF Core DbContext) inside the
+        // lambda — the scope lives exactly as long as the task itself, completely
+        // independent of the original HTTP request scope.
         _canonQueue.QueueWithDependency<EmailSender>(async (sender) =>
         {
-            await sender.SendAsync(); // Which may be slow. The service 'EmailSender' will be kept alive!
+            await sender.SendAsync(); // 'sender' is resolved from a fresh DI scope.
         });
-        
+
+        // Returns immediately — the email is sent in the background.
         return Ok();
     }
 }
@@ -280,7 +286,7 @@ In this example, `Task.Delay` simulates a 10-second task. Because the timeout is
 
 ---
 
-## Background Job Framework
+## Part 2: Background Job Framework
 
 Beyond fire-and-forget, Canon ships three layered packages that give you a full observable background job system — with registry, admin-triggerable jobs, status tracking, and recurring schedules.
 
@@ -422,6 +428,8 @@ public class AdminController(BackgroundJobRegistry registry) : Controller
     [HttpPost]
     public IActionResult RunDigest()
     {
+        // Non-blocking: enqueues the job and returns immediately.
+        // The job runs in the background on its own IServiceScope.
         registry.TriggerNow<SendWeeklyDigestJob>();
         return RedirectToAction("Jobs");
     }
