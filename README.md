@@ -278,3 +278,236 @@ public async Task ProcessDataWithDeadline()
 
 In this example, `Task.Delay` simulates a 10-second task. Because the timeout is set to 5 seconds, the `TimeoutStopper` will throw a `TimeoutException` before the task can complete.
 
+---
+
+## Background Job Framework
+
+Beyond fire-and-forget, Canon ships three layered packages that give you a full observable background job system — with registry, admin-triggerable jobs, status tracking, and recurring schedules.
+
+```
+Aiursoft.Canon                     (fire-and-forget primitives)
+  └─ Aiursoft.Canon.ServiceTaskQueue  (named queues + task status tracking)
+       └─ Aiursoft.Canon.BackgroundJobs  (job registry + IBackgroundJob contract)
+            └─ Aiursoft.Canon.ScheduledTasks  (recurring timers)
+```
+
+Install the packages you need:
+
+```bash
+dotnet add package Aiursoft.Canon.ServiceTaskQueue
+dotnet add package Aiursoft.Canon.BackgroundJobs
+dotnet add package Aiursoft.Canon.ScheduledTasks
+```
+
+---
+
+### Layer 1 — `Aiursoft.Canon.ServiceTaskQueue`
+
+`ServiceTaskQueue` is a named, per-queue-serial task engine with full status tracking. Unlike `CanonQueue` (which is parallel fire-and-forget), tasks within the **same queue name** run **one at a time**, while tasks in different queues run in parallel.
+
+Register the engine in `Startup.cs`:
+
+```csharp
+using Aiursoft.Canon.TaskQueue;
+
+services.AddTaskQueueEngine();   // registers ServiceTaskQueue + TaskQueueWorkerService
+```
+
+Enqueue tasks with DI:
+
+```csharp
+public class MyService(ServiceTaskQueue taskQueue)
+{
+    public void SendReport(int userId)
+    {
+        taskQueue.QueueWithDependency<ReportSender>(
+            queueName: "reports",       // tasks in "reports" run serially
+            taskName: "Weekly report",
+            task: sender => sender.SendAsync(userId));
+    }
+}
+```
+
+Observe task state at any time:
+
+```csharp
+// All tasks ever recorded (most-recent first)
+IEnumerable<TaskExecutionInfo> all = taskQueue.GetAllTasks();
+
+// Tasks still waiting to start
+IEnumerable<TaskExecutionInfo> pending = taskQueue.GetPendingTasks();
+
+// Tasks currently running
+IEnumerable<TaskExecutionInfo> running = taskQueue.GetProcessingTasks();
+
+// Tasks that completed within the last hour
+IEnumerable<TaskExecutionInfo> recent = taskQueue.GetRecentCompletedTasks(TimeSpan.FromHours(1));
+
+// Cancel a task that hasn't started yet
+bool wasCancelled = taskQueue.CancelTask(taskId);
+```
+
+Each `TaskExecutionInfo` carries:
+
+| Property | Type | Meaning |
+|---|---|---|
+| `TaskId` | `Guid` | Unique task identifier |
+| `QueueName` | `string` | Which named queue this task belongs to |
+| `TaskName` | `string` | Human-readable label |
+| `Status` | `TaskExecutionStatus` | `Pending / Processing / Success / Failed / Cancelled` |
+| `TriggerSource` | `TaskTriggerSource` | `Unknown / Manual / Scheduled` |
+| `QueuedAt` | `DateTime` | When the task was enqueued |
+| `StartedAt` | `DateTime?` | When execution began |
+| `CompletedAt` | `DateTime?` | When execution finished |
+| `ErrorMessage` | `string?` | Exception text if the task failed |
+
+---
+
+### Layer 2 — `Aiursoft.Canon.BackgroundJobs`
+
+This layer introduces the `IBackgroundJob` contract and a **global registry** so that an admin page (or any code) can discover, describe, and instantly trigger any pre-registered job by type — without knowing the implementation details.
+
+#### Step 1 — Implement `IBackgroundJob`
+
+```csharp
+using Aiursoft.Canon.BackgroundJobs;
+
+public class SendWeeklyDigestJob : IBackgroundJob
+{
+    // Human-readable metadata shown in management UIs
+    public string Name        => "Weekly Digest";
+    public string Description => "Sends the weekly digest email to all subscribers.";
+
+    private readonly MailService _mail;
+
+    public SendWeeklyDigestJob(MailService mail) => _mail = mail;
+
+    public async Task ExecuteAsync()
+    {
+        await _mail.SendDigestAsync();
+    }
+}
+```
+
+Key design rules:
+
+- A job receives its dependencies through **constructor injection** (normal DI — scoped services are fine).
+- When triggered from the admin UI, the job runs with all its **default behaviour** (no extra parameters needed).
+- `Name` and `Description` are pure metadata; they are read lazily when the registry is queried.
+
+#### Step 2 — Register jobs
+
+```csharp
+using Aiursoft.Canon.BackgroundJobs;
+using Aiursoft.Canon.TaskQueue;
+
+// Required: the underlying task engine
+services.AddTaskQueueEngine();
+
+// Register each job — order is preserved in the registry
+services.RegisterBackgroundJob<SendWeeklyDigestJob>();
+services.RegisterBackgroundJob<CleanupOrphanFilesJob>();
+```
+
+`RegisterBackgroundJob<TJob>()` registers the job as `Transient` (so DI creates a fresh instance per run) and records a `RegisteredJob` descriptor in the DI container.
+
+#### Step 3 — Trigger jobs
+
+Inject `BackgroundJobRegistry` wherever you need to fire a job:
+
+```csharp
+public class AdminController(BackgroundJobRegistry registry) : Controller
+{
+    // Trigger by generic type — compile-time safe
+    [HttpPost]
+    public IActionResult RunDigest()
+    {
+        registry.TriggerNow<SendWeeklyDigestJob>();
+        return RedirectToAction("Jobs");
+    }
+
+    // Trigger by runtime type (useful in generic admin endpoints)
+    [HttpPost]
+    public IActionResult TriggerJob(string typeName)
+    {
+        registry.TriggerNow(typeName);   // throws if not registered
+        return RedirectToAction("Jobs");
+    }
+}
+```
+
+List all registered jobs to build a management UI:
+
+```csharp
+IReadOnlyList<RegisteredJob> jobs = registry.GetAll();
+
+foreach (var job in jobs)
+{
+    Console.WriteLine($"{job.Name}: {job.Description}");
+}
+```
+
+---
+
+### Layer 3 — `Aiursoft.Canon.ScheduledTasks`
+
+Once a job is registered in the `BackgroundJobRegistry`, you can attach a **recurring schedule** to it with a single call. The `JobSchedulerService` hosted service fires each timer and enqueues the job with `TriggerSource.Scheduled`.
+
+```csharp
+using Aiursoft.Canon.BackgroundJobs;
+using Aiursoft.Canon.ScheduledTasks;
+using Aiursoft.Canon.TaskQueue;
+
+services.AddTaskQueueEngine();
+services.AddScheduledTaskEngine();   // registers the timer-based hosted service
+
+// Register the job and capture the descriptor
+var digestJob = services.RegisterBackgroundJob<SendWeeklyDigestJob>();
+var cleanupJob = services.RegisterBackgroundJob<CleanupOrphanFilesJob>();
+
+// Schedule: period + optional start delay
+services.RegisterScheduledTask(
+    registration: digestJob,
+    period:       TimeSpan.FromDays(7),
+    startDelay:   TimeSpan.FromMinutes(1));   // wait 1 min after app start
+
+services.RegisterScheduledTask(
+    registration: cleanupJob,
+    period:       TimeSpan.FromHours(6),
+    startDelay:   TimeSpan.FromMinutes(5));
+```
+
+Default values: `period = 3 hours`, `startDelay = 3 minutes` if not specified.
+
+At runtime the scheduler logs each enqueue:
+
+```
+Job Scheduler: scheduling SendWeeklyDigestJob every 7.00:00:00 (first run after 00:01:00)
+Job Scheduler: enqueued scheduled run of SendWeeklyDigestJob (taskId=3f2a…)
+```
+
+The resulting `TaskExecutionInfo` will have `TriggerSource = Scheduled`, so your management UI can distinguish scheduled runs from manual ones.
+
+---
+
+### Full startup example
+
+```csharp
+using Aiursoft.Canon.TaskQueue;
+using Aiursoft.Canon.BackgroundJobs;
+using Aiursoft.Canon.ScheduledTasks;
+
+// ── Infrastructure ──────────────────────────────────────────────
+services.AddTaskQueueEngine();     // ServiceTaskQueue + TaskQueueWorkerService
+services.AddScheduledTaskEngine(); // JobSchedulerService
+
+// ── Jobs ────────────────────────────────────────────────────────
+var digestJob  = services.RegisterBackgroundJob<SendWeeklyDigestJob>();
+var cleanupJob = services.RegisterBackgroundJob<CleanupOrphanFilesJob>();
+
+// ── Schedules ───────────────────────────────────────────────────
+services.RegisterScheduledTask(digestJob,  period: TimeSpan.FromDays(7),  startDelay: TimeSpan.FromMinutes(1));
+services.RegisterScheduledTask(cleanupJob, period: TimeSpan.FromHours(6), startDelay: TimeSpan.FromMinutes(5));
+```
+
+

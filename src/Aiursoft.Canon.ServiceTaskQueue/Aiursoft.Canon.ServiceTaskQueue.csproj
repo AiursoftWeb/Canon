@@ -3,8 +3,8 @@
     <OutputType>Library</OutputType>
     <Version>10.0.6</Version>
     <TargetFramework>net10.0</TargetFramework>
-    <AssemblyName>Aiursoft.Canon</AssemblyName>
-    <RootNamespace>Aiursoft.Canon</RootNamespace>
+    <AssemblyName>Aiursoft.Canon.ServiceTaskQueue</AssemblyName>
+    <RootNamespace>Aiursoft.Canon.TaskQueue</RootNamespace>
     <IsTestProject>false</IsTestProject>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
@@ -13,9 +13,9 @@
     <Company>Aiursoft</Company>
     <Product>Canon</Product>
     <Authors>anduin</Authors>
-    <Description>Task fire and forget framework</Description>
-    <PackageId>Aiursoft.Canon</PackageId>
-    <PackageTags>task asp.net fire-and-forget task-pool</PackageTags>
+    <Description>Named, observable, per-queue-serial task queue built on Aiursoft.Canon. Provides task status tracking, cancellation, and trigger-source attribution for background job frameworks.</Description>
+    <PackageId>Aiursoft.Canon.ServiceTaskQueue</PackageId>
+    <PackageTags>task-queue background-jobs observable named-queue aiursoft</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://gitlab.aiursoft.com/Aiursoft/Canon</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
@@ -23,8 +23,8 @@
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Aiursoft.Scanner.Abstractions" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.5" />
+    <ProjectReference Include="..\Aiursoft.Canon\Aiursoft.Canon.csproj" />
     <None Include="../../Readme.md" Pack="true" PackagePath="." />
   </ItemGroup>
 </Project>

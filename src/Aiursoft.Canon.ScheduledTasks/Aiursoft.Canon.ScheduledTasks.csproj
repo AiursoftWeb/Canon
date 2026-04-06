@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <Version>10.0.5</Version>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Aiursoft.Canon.ScheduledTasks</AssemblyName>
+    <RootNamespace>Aiursoft.Canon.ScheduledTasks</RootNamespace>
+    <IsTestProject>false</IsTestProject>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Company>Aiursoft</Company>
+    <Product>ScheduledTasks</Product>
+    <Description>Recurring scheduler layer for Aiursoft background jobs.</Description>
+    <PackageId>Aiursoft.Canon.ScheduledTasks</PackageId>
+    <PackageTags>scheduler background-jobs recurring hosted-service aiursoft</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://gitlab.aiursoft.com/aiursoft/canon</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://gitlab.aiursoft.com/aiursoft/canon.git</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Aiursoft.Canon.BackgroundJobs\Aiursoft.Canon.BackgroundJobs.csproj" />
+    <None Include="../../README.md" Pack="true" PackagePath="." />
+  </ItemGroup>
+</Project>

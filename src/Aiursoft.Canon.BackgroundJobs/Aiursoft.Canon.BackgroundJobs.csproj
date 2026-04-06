@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <Version>10.0.6</Version>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Aiursoft.Canon.BackgroundJobs</AssemblyName>
+    <RootNamespace>Aiursoft.Canon.BackgroundJobs</RootNamespace>
+    <IsTestProject>false</IsTestProject>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Company>Aiursoft</Company>
+    <Product>BackgroundJobs</Product>
+    <Description>Background job registry and triggering layer built on Aiursoft.Canon task queue.</Description>
+    <PackageId>Aiursoft.Canon.BackgroundJobs</PackageId>
+    <PackageTags>background-jobs task-queue fire-and-forget aiursoft</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://gitlab.aiursoft.com/aiursoft/canon</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://gitlab.aiursoft.com/aiursoft/canon.git</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Aiursoft.Canon.ServiceTaskQueue\Aiursoft.Canon.ServiceTaskQueue.csproj" />
+    <None Include="../../README.md" Pack="true" PackagePath="." />
+  </ItemGroup>
+</Project>
