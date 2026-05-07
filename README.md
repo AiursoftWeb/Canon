@@ -397,9 +397,37 @@ public class SendWeeklyDigestJob : IBackgroundJob
 
 Key design rules:
 
-- A job receives its dependencies through **constructor injection** (normal DI — scoped services are fine).
+- A job receives its dependencies through **constructor injection** (normal DI).
 - When triggered from the admin UI, the job runs with all its **default behaviour** (no extra parameters needed).
 - `Name` and `Description` are pure metadata; they are read lazily when the registry is queried.
+
+#### Lifecycle & Dependency Injection
+
+When you call `services.RegisterBackgroundJob<TJob>()`, your job is registered as a **Transient** service. 
+
+However, the execution engine ensures that every time a job runs (whether manually or scheduled), it is executed within its own **unique `IServiceScope`**. 
+
+This means:
+- **Scoped services are 100% safe**: You can inject Scoped services like Entity Framework Core's `DbContext` directly into your job's constructor. 
+- **Fresh instance per run**: Every execution gets a brand-new instance of the job and all its Scoped dependencies.
+- **Automatic cleanup**: The `DbContext` and other Scoped services will be automatically disposed of when the `ExecuteAsync` method completes.
+
+```csharp
+public class MyDatabaseJob(MyDbContext db) : IBackgroundJob
+{
+    public string Name => "Database Cleanup";
+    public string Description => "Cleans up old records from the database.";
+
+    public async Task ExecuteAsync()
+    {
+        // 'db' is safe to use here. It belongs to a scope created 
+        // specifically for this single run of this job.
+        var oldRecords = await db.Records.Where(r => r.IsOld).ToListAsync();
+        db.Records.RemoveRange(oldRecords);
+        await db.SaveChangesAsync();
+    }
+}
+```
 
 #### Step 2 — Register jobs
 
