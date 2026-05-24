@@ -7,6 +7,7 @@ namespace Aiursoft.Canon.ScheduledTasks;
 
 public class JobSchedulerService(
     BackgroundJobRegistry registry,
+    ServiceTaskQueue taskQueue,
     IEnumerable<ScheduledTaskRegistration> scheduledTasks,
     ILogger<JobSchedulerService> logger) : IHostedService, IDisposable
 {
@@ -45,6 +46,14 @@ public class JobSchedulerService(
     {
         try
         {
+            if (task.SkipIfStacked && taskQueue.HasPendingOrProcessingTasks(task.JobType.Name))
+            {
+                logger.LogInformation(
+                    "Job Scheduler: skipping scheduled run of {JobType} — previous execution still pending or running",
+                    task.JobType.Name);
+                return;
+            }
+
             var taskId = registry.TriggerNow(task.JobType, TaskTriggerSource.Scheduled);
             logger.LogInformation(
                 "Job Scheduler: enqueued scheduled run of {JobType} (taskId={TaskId})",

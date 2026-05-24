@@ -15,4 +15,11 @@ public class ScheduledTaskRegistration
 
     /// <summary>How often the job is triggered after the initial <see cref="StartDelay"/>.</summary>
     public required TimeSpan Period { get; init; }
+
+    /// <summary>
+    /// When <see langword="true"/>, the scheduler skips this tick if the previous execution
+    /// is still pending or running, preventing queue build-up for long-running jobs.
+    /// Defaults to <see langword="false"/>.
+    /// </summary>
+    public bool SkipIfStacked { get; init; }
 }

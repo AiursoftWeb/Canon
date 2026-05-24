@@ -22,11 +22,16 @@ public static class ScheduledTaskExtensions
     /// How long to wait after application startup before the first trigger.
     /// Defaults to 3 minutes when <see langword="null"/>.
     /// </param>
+    /// <param name="skipIfStacked">
+    /// When <see langword="true"/>, the scheduler skips this tick if the previous execution
+    /// is still pending or running. Defaults to <see langword="false"/>.
+    /// </param>
     public static IServiceCollection RegisterScheduledTask(
         this IServiceCollection services,
         RegisteredJob registration,
         TimeSpan? period = null,
-        TimeSpan? startDelay = null)
+        TimeSpan? startDelay = null,
+        bool skipIfStacked = false)
     {
         ArgumentNullException.ThrowIfNull(registration);
 
@@ -34,7 +39,8 @@ public static class ScheduledTaskExtensions
         {
             JobType = registration.JobType,
             Period = period ?? TimeSpan.FromHours(3),
-            StartDelay = startDelay ?? TimeSpan.FromMinutes(3)
+            StartDelay = startDelay ?? TimeSpan.FromMinutes(3),
+            SkipIfStacked = skipIfStacked
         });
 
         return services;

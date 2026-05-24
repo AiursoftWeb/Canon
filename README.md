@@ -515,7 +515,22 @@ services.RegisterScheduledTask(
 
 Default values: `period = 3 hours`, `startDelay = 3 minutes` if not specified.
 
-At runtime the scheduler logs each enqueue:
+#### Preventing queue build-up with `skipIfStacked`
+
+When a job's execution time can exceed its schedule period (e.g. a 6-hour job on a 3-hour timer), each tick blindly enqueues a new task. The queue serializes execution, so they never overlap — but tasks pile up in memory as pending work.
+
+Set `skipIfStacked: true` to make the scheduler check whether the previous run is still pending or processing before enqueuing:
+
+```csharp
+services.RegisterScheduledTask(
+    registration: longRunningJob,
+    period:       TimeSpan.FromHours(3),
+    skipIfStacked: true);   // skip this tick if the last run hasn't finished yet
+```
+
+When the queue for that job is idle again, the next tick enqueues normally. The default is `false` (preserves existing behavior).
+
+At runtime the scheduler logs each enqueue (or skip):
 
 ```
 Job Scheduler: scheduling SendWeeklyDigestJob every 7.00:00:00 (first run after 00:01:00)

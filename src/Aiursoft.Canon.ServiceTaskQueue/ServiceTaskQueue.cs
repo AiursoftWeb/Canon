@@ -188,6 +188,22 @@ public class ServiceTaskQueue
         }
     }
 
+    /// <summary>
+    /// Returns <see langword="true"/> if the named queue has at least one task that is
+    /// <see cref="TaskExecutionStatus.Pending"/> or <see cref="TaskExecutionStatus.Processing"/>.
+    /// Used by the scheduler to skip a tick when <c>SkipIfStacked</c> is enabled.
+    /// </summary>
+    public bool HasPendingOrProcessingTasks(string queueName)
+    {
+        if (_queueProcessingStatus.TryGetValue(queueName, out var isProcessing) && isProcessing)
+            return true;
+
+        if (_queuesByName.TryGetValue(queueName, out var queue) && !queue.IsEmpty)
+            return true;
+
+        return false;
+    }
+
     internal IEnumerable<string> GetQueuesWithPendingTasks()
     {
         return _queuesByName.Keys;
