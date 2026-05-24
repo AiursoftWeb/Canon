@@ -23,6 +23,7 @@
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="Aiursoft.Canon.Tests" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.8" />
     <ProjectReference Include="..\Aiursoft.Canon\Aiursoft.Canon.csproj" />
     <None Include="../../Readme.md" Pack="true" PackagePath="." />

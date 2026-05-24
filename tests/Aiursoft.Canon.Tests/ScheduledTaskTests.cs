@@ -28,12 +28,13 @@ public class ScheduledTaskTests
 {
     private static (IServiceProvider Provider, RegisteredJob Registration) BuildWithSchedule(
         TimeSpan? period = null,
-        TimeSpan? startDelay = null)
+        TimeSpan? startDelay = null,
+        bool skipIfStacked = false)
     {
         var services = new ServiceCollection().AddLogging();
         services.AddSingleton<ServiceTaskQueue>();
         var reg = services.RegisterBackgroundJob<CounterJob>();
-        services.RegisterScheduledTask(reg, period, startDelay);
+        services.RegisterScheduledTask(reg, period, startDelay, skipIfStacked);
         return (services.BuildServiceProvider(), reg);
     }
 
@@ -128,5 +129,45 @@ public class ScheduledTaskTests
             Assert.Fail("Expected ArgumentNullException was not thrown.");
         }
         catch (ArgumentNullException) { }
+    }
+
+    // ── SkipIfStacked ──────────────────────────────────────────────────────────
+
+    [TestMethod]
+    public void RegisterScheduledTask_SkipIfStacked_DefaultsToFalse()
+    {
+        var (provider, _) = BuildWithSchedule(period: TimeSpan.FromHours(1), startDelay: null);
+
+        var schedule = provider.GetServices<ScheduledTaskRegistration>().Single();
+
+        Assert.IsFalse(schedule.SkipIfStacked);
+    }
+
+    [TestMethod]
+    public void RegisterScheduledTask_SkipIfStacked_True_StoredCorrectly()
+    {
+        var services = new ServiceCollection().AddLogging();
+        services.AddSingleton<ServiceTaskQueue>();
+        var reg = services.RegisterBackgroundJob<CounterJob>();
+        services.RegisterScheduledTask(reg, period: TimeSpan.FromHours(1), skipIfStacked: true);
+
+        var provider  = services.BuildServiceProvider();
+        var schedule  = provider.GetServices<ScheduledTaskRegistration>().Single();
+
+        Assert.IsTrue(schedule.SkipIfStacked);
+    }
+
+    [TestMethod]
+    public void RegisterScheduledTask_SkipIfStacked_False_StoredCorrectly()
+    {
+        var services = new ServiceCollection().AddLogging();
+        services.AddSingleton<ServiceTaskQueue>();
+        var reg = services.RegisterBackgroundJob<CounterJob>();
+        services.RegisterScheduledTask(reg, period: TimeSpan.FromHours(1), skipIfStacked: false);
+
+        var provider  = services.BuildServiceProvider();
+        var schedule  = provider.GetServices<ScheduledTaskRegistration>().Single();
+
+        Assert.IsFalse(schedule.SkipIfStacked);
     }
 }
