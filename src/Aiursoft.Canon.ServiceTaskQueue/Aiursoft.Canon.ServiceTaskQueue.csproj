@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <Version>10.0.12</Version>
+    <Version>10.0.13</Version>
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>Aiursoft.Canon.ServiceTaskQueue</AssemblyName>
     <RootNamespace>Aiursoft.Canon.TaskQueue</RootNamespace>
@@ -24,7 +24,7 @@
   </PropertyGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Aiursoft.Canon.Tests"></InternalsVisibleTo>
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.10" />
     <ProjectReference Include="..\Aiursoft.Canon\Aiursoft.Canon.csproj" />
     <None Include="../../Readme.md" Pack="true" PackagePath="." />
   </ItemGroup>
