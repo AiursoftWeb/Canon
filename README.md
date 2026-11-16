@@ -1,5 +1,7 @@
 # Aiursoft Canon
 
+<a name="aiursoft-canon"></a>
+
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/AiursoftWeb/canon/blob/master/LICENSE)
 [![Pipeline stat](https://badge-proxy.aiursoft.com/aiursoft/canon/badges/master/pipeline.svg)](https://gitlab.aiursoft.com/aiursoft/canon/-/pipelines)
 [![Test Coverage](https://badge-proxy.aiursoft.com/aiursoft/canon/badges/master/coverage.svg)](https://gitlab.aiursoft.com/aiursoft/canon/-/pipelines)
@@ -11,20 +13,11 @@ Aiursoft Canon is used to implement dependency-based Fire and Forget for .NET pr
 
 This is very useful in many scenarios to avoid blocking, such as when sending emails.
 
-## Table of Contents
+## Overview
 
-- [Part 1: Core Toolkit](#part-1-core-toolkit)
-  - [CanonQueue — Fire and Forget](#how-to-use-aiursoftcanonqueue)
-  - [CanonPool — Bounded Concurrency](#how-to-use-aiursoftcanonpool)
-  - [RetryEngine — Automatic Retry](#how-to-use-aiursoftretryengine)
-  - [CacheService — In-Memory Cache](#how-to-use-aiursoftcacheservice)
-  - [TimeoutStopper — Deadline Enforcement](#how-to-use-aiursofttimeoutstopper)
-- [Part 2: Background Job Framework](#part-2-background-job-framework)
-  - [Layer 1 — ServiceTaskQueue](#layer-1--aiursoftcanonservicetaskqueue)
-  - [Layer 2 — BackgroundJobs](#layer-2--aiursoftcanonbackgroundjobs)
-  - [Layer 3 — ScheduledTasks](#layer-3--aiursoftcanonscheduledtasks)
+### What is Canon?
 
-## Why this project
+<a name="why-this-project"></a>
 
 The traditional way to fire and forget in C# is:
 
@@ -37,7 +30,11 @@ _ = Task.Run(() =>
 
 However, if your task depends on something like Entity Framework, it's hard to control it's life cycle.
 
-## How to install
+## Installation
+
+Add the package to your .NET project:
+
+<a name="how-to-install"></a>
 
 First, install `Aiursoft.Canon` to your ASP.NET Core project from [nuget.org](https://www.nuget.org/packages/Aiursoft.Canon/):
 
@@ -45,31 +42,55 @@ First, install `Aiursoft.Canon` to your ASP.NET Core project from [nuget.org](ht
 dotnet add package Aiursoft.Canon
 ```
 
-Add the service to your [`IServiceCollection`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection) in `StartUp.cs`:
+**Standalone console example**
+
+The console example also uses the standard Microsoft service registrations:
+
+```bash
+dotnet add package Microsoft.Extensions.Logging
+```
+
+Requires .NET 10 or later.
+
+## Usage
+
+Start with this complete console `Program.cs` after installing the package:
 
 ```csharp
 using Aiursoft.Canon;
+using Microsoft.Extensions.DependencyInjection;
 
+var services = new ServiceCollection();
+services.AddLogging();
 services.AddTaskCanon();
-
-/* Under the hood, this single line registers everything you need — you do NOT
-   need to copy any of these manually:
-
-   services.AddTransient<RetryEngine>();     // exponential-backoff retry
-   services.AddTransient<CacheService>();    // in-memory cache helper
-   services.AddTransient<TimeoutStopper>();  // deadline enforcement
-   services.AddTransient<CanonPool>();       // bounded-concurrency pool (Transient)
-   services.AddSingleton<CanonService>();    // simple fire-and-forget
-   services.AddSingleton<CanonQueue>();      // DI-scoped background queue
-   services.AddTransient<WatchService>();    // execution-time measurement
-*/
+using var provider = services.BuildServiceProvider();
+var stopper = provider.GetRequiredService<TimeoutStopper>();
+var result = await stopper.RunWithTimeout(_ => Task.FromResult("Completed"), timeoutInSeconds: 5);
+Console.WriteLine(result);
 ```
 
----
+**Tutorial navigation**
 
-## Part 1: Core Toolkit
+<a name="table-of-contents"></a>
 
-### How to use Aiursoft.CanonQueue
+- [Part 1: Core Toolkit](#part-1-core-toolkit)
+  - [CanonQueue — Fire and Forget](#how-to-use-aiursoftcanonqueue)
+  - [CanonPool — Bounded Concurrency](#how-to-use-aiursoftcanonpool)
+  - [RetryEngine — Automatic Retry](#how-to-use-aiursoftretryengine)
+  - [CacheService — In-Memory Cache](#how-to-use-aiursoftcacheservice)
+  - [TimeoutStopper — Deadline Enforcement](#how-to-use-aiursofttimeoutstopper)
+- [Part 2: Background Job Framework](#part-2-background-job-framework)
+  - [Layer 1 — ServiceTaskQueue](#layer-1--aiursoftcanonservicetaskqueue)
+  - [Layer 2 — BackgroundJobs](#layer-2--aiursoftcanonbackgroundjobs)
+  - [Layer 3 — ScheduledTasks](#layer-3--aiursoftcanonscheduledtasks)
+
+### Core toolkit
+
+<a name="part-1-core-toolkit"></a>
+
+#### How to use Aiursoft.CanonQueue
+
+<a name="how-to-use-aiursoftcanonqueue"></a>
 
 Then, you can inject `CanonQueue` to your controller. And now, you can fire and forget your task like this:
 
@@ -104,7 +125,9 @@ That's it.
 
 -----
 
-### How to use Aiursoft.CanonPool
+#### How to use Aiursoft.CanonPool
+
+<a name="how-to-use-aiursoftcanonpool"></a>
 
 You can also put all your tasks to a task queue, and run those tasks with a limit of concurrency:
 
@@ -135,7 +158,7 @@ foreach (var user in users)
 }
 
 // Execute tasks in pool, with a maximum of 8 running at the same time.
-await _canonPool.RunAllTasksInPoolAsync(); 
+await _canonPool.RunAllTasksInPoolAsync();
 ```
 
 This is far better than this:
@@ -147,7 +170,7 @@ foreach (var user in users)
     tasks.Add(Task.Run(() => sender.SendAsync(user)));
 }
 // This may start too many tasks at once and overload your remote service.
-await Task.WhenAll(tasks); 
+await Task.WhenAll(tasks);
 ```
 
 You can control the concurrency of your tasks. For example, you can start 16 tasks at the same time:
@@ -160,7 +183,9 @@ That helps you to avoid blocking your Email sender or database with too many tas
 
 -----
 
-### How to use Aiursoft.RetryEngine
+#### How to use Aiursoft.RetryEngine
+
+<a name="how-to-use-aiursoftretryengine"></a>
 
 The `RetryEngine` is useful for automatically retrying an operation that might fail, such as a network request. It uses an exponential backoff strategy to wait between retries.
 
@@ -180,15 +205,15 @@ Now, you can wrap a potentially failing task with `RunWithRetry`.
 ```csharp
 public async Task<string> CallUnreliableApiService()
 {
-    var result = await _retry.RunWithRetry(async (attempt) => 
+    var result = await _retry.RunWithRetry(async (attempt) =>
     {
         // This code will be executed up to 5 times.
         Console.WriteLine($"Trying to call the API, attempt {attempt}...");
         var client = new HttpClient();
         var response = await client.GetStringAsync("https://example.com/api/data");
         return response;
-    }, 
-    attempts: 5, 
+    },
+    attempts: 5,
     when: e => e is HttpRequestException); // Only retry on HttpRequestException.
 
     return result;
@@ -199,7 +224,9 @@ If the API call fails with an `HttpRequestException`, the `RetryEngine` will wai
 
 -----
 
-### How to use Aiursoft.CacheService
+#### How to use Aiursoft.CacheService
+
+<a name="how-to-use-aiursoftcacheservice"></a>
 
 `CacheService` provides a simple way to cache results from expensive operations in memory, reducing redundant calls.
 
@@ -227,7 +254,7 @@ public async Task<IActionResult> GetDashboard()
     var cacheKey = "dashboard-stats";
 
     // This data will be cached for 10 minutes.
-    var stats = await _cache.RunWithCache(cacheKey, async () => 
+    var stats = await _cache.RunWithCache(cacheKey, async () =>
     {
         // This logic only runs if the cache is empty or expired.
         // It's an expensive database query.
@@ -243,7 +270,9 @@ The next time `GetDashboard` is called within 10 minutes, the expensive database
 
 -----
 
-### How to use Aiursoft.TimeoutStopper
+#### How to use Aiursoft.TimeoutStopper
+
+<a name="how-to-use-aiursofttimeoutstopper"></a>
 
 `TimeoutStopper` allows you to run a task with a specified time limit. If the task doesn't complete within the timeout, a `TimeoutException` is thrown. This is useful for preventing long-running operations from blocking your application indefinitely.
 
@@ -287,7 +316,9 @@ In this example, `Task.Delay` simulates a 10-second task. Because the timeout is
 
 ---
 
-## Part 2: Background Job Framework
+### Background job framework
+
+<a name="part-2-background-job-framework"></a>
 
 Beyond fire-and-forget, Canon ships three layered packages that give you a full observable background job system — with registry, admin-triggerable jobs, status tracking, and recurring schedules.
 
@@ -308,7 +339,9 @@ dotnet add package Aiursoft.Canon.ScheduledTasks
 
 ---
 
-### Layer 1 — `Aiursoft.Canon.ServiceTaskQueue`
+#### Layer 1 — `Aiursoft.Canon.ServiceTaskQueue`
+
+<a name="layer-1--aiursoftcanonservicetaskqueue"></a>
 
 `ServiceTaskQueue` is a named, per-queue-serial task engine with full status tracking. Unlike `CanonQueue` (which is parallel fire-and-forget), tasks within the **same queue name** run **one at a time**, while tasks in different queues run in parallel.
 
@@ -370,11 +403,15 @@ Each `TaskExecutionInfo` carries:
 
 ---
 
-### Layer 2 — `Aiursoft.Canon.BackgroundJobs`
+#### Layer 2 — `Aiursoft.Canon.BackgroundJobs`
+
+<a name="layer-2--aiursoftcanonbackgroundjobs"></a>
 
 This layer introduces the `IBackgroundJob` contract and a **global registry** so that an admin page (or any code) can discover, describe, and instantly trigger any pre-registered job by type — without knowing the implementation details.
 
-#### Step 1 — Implement `IBackgroundJob`
+##### Step 1 — Implement `IBackgroundJob`
+
+<a name="step-1--implement-ibackgroundjob"></a>
 
 ```csharp
 using Aiursoft.Canon.BackgroundJobs;
@@ -402,14 +439,16 @@ Key design rules:
 - When triggered from the admin UI, the job runs with all its **default behaviour** (no extra parameters needed).
 - `Name` and `Description` are pure metadata; they are read lazily when the registry is queried.
 
-#### Lifecycle & Dependency Injection
+##### Lifecycle & Dependency Injection
 
-When you call `services.RegisterBackgroundJob<TJob>()`, your job is registered as a **Transient** service. 
+<a name="lifecycle--dependency-injection"></a>
 
-However, the execution engine ensures that every time a job runs (whether manually or scheduled), it is executed within its own **unique `IServiceScope`**. 
+When you call `services.RegisterBackgroundJob<TJob>()`, your job is registered as a **Transient** service.
+
+However, the execution engine ensures that every time a job runs (whether manually or scheduled), it is executed within its own **unique `IServiceScope`**.
 
 This means:
-- **Scoped services are 100% safe**: You can inject Scoped services like Entity Framework Core's `DbContext` directly into your job's constructor. 
+- **Scoped services are 100% safe**: You can inject Scoped services like Entity Framework Core's `DbContext` directly into your job's constructor.
 - **Fresh instance per run**: Every execution gets a brand-new instance of the job and all its Scoped dependencies.
 - **Automatic cleanup**: The `DbContext` and other Scoped services will be automatically disposed of when the `ExecuteAsync` method completes.
 
@@ -421,7 +460,7 @@ public class MyDatabaseJob(MyDbContext db) : IBackgroundJob
 
     public async Task ExecuteAsync()
     {
-        // 'db' is safe to use here. It belongs to a scope created 
+        // 'db' is safe to use here. It belongs to a scope created
         // specifically for this single run of this job.
         var oldRecords = await db.Records.Where(r => r.IsOld).ToListAsync();
         db.Records.RemoveRange(oldRecords);
@@ -430,7 +469,9 @@ public class MyDatabaseJob(MyDbContext db) : IBackgroundJob
 }
 ```
 
-#### Step 2 — Register jobs
+##### Step 2 — Register jobs
+
+<a name="step-2--register-jobs"></a>
 
 ```csharp
 using Aiursoft.Canon.BackgroundJobs;
@@ -446,7 +487,9 @@ services.RegisterBackgroundJob<CleanupOrphanFilesJob>();
 
 `RegisterBackgroundJob<TJob>()` registers the job as `Transient` (so DI creates a fresh instance per run) and records a `RegisteredJob` descriptor in the DI container.
 
-#### Step 3 — Trigger jobs
+##### Step 3 — Trigger jobs
+
+<a name="step-3--trigger-jobs"></a>
 
 Inject `BackgroundJobRegistry` wherever you need to fire a job:
 
@@ -486,7 +529,9 @@ foreach (var job in jobs)
 
 ---
 
-### Layer 3 — `Aiursoft.Canon.ScheduledTasks`
+#### Layer 3 — `Aiursoft.Canon.ScheduledTasks`
+
+<a name="layer-3--aiursoftcanonscheduledtasks"></a>
 
 Once a job is registered in the `BackgroundJobRegistry`, you can attach a **recurring schedule** to it with a single call. The `JobSchedulerService` hosted service fires each timer and enqueues the job with `TriggerSource.Scheduled`.
 
@@ -516,7 +561,9 @@ services.RegisterScheduledTask(
 
 Default values: `period = 3 hours`, `startDelay = 3 minutes` if not specified.
 
-#### Preventing queue build-up with `skipIfStacked`
+##### Preventing queue build-up with `skipIfStacked`
+
+<a name="preventing-queue-build-up-with-skipifstacked"></a>
 
 When a job's execution time can exceed its schedule period (e.g. a 6-hour job on a 3-hour timer), each tick blindly enqueues a new task. The queue serializes execution, so they never overlap — but tasks pile up in memory as pending work.
 
@@ -542,7 +589,9 @@ The resulting `TaskExecutionInfo` will have `TriggerSource = Scheduled`, so your
 
 ---
 
-### Full startup example
+#### Full startup example
+
+<a name="full-startup-example"></a>
 
 ```csharp
 using Aiursoft.Canon.TaskQueue;
@@ -562,4 +611,56 @@ services.RegisterScheduledTask(digestJob,  period: TimeSpan.FromDays(7),  startD
 services.RegisterScheduledTask(cleanupJob, period: TimeSpan.FromHours(6), startDelay: TimeSpan.FromMinutes(5));
 ```
 
+## Configuration
 
+Add the service to your [`IServiceCollection`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection) in `StartUp.cs`:
+
+```csharp
+using Aiursoft.Canon;
+
+services.AddTaskCanon();
+
+/* Under the hood, this single line registers everything you need — you do NOT
+   need to copy any of these manually:
+
+   services.AddTransient<RetryEngine>();     // exponential-backoff retry
+   services.AddTransient<CacheService>();    // in-memory cache helper
+   services.AddTransient<TimeoutStopper>();  // deadline enforcement
+   services.AddTransient<CanonPool>();       // bounded-concurrency pool (Transient)
+   services.AddSingleton<CanonService>();    // simple fire-and-forget
+   services.AddSingleton<CanonQueue>();      // DI-scoped background queue
+   services.AddTransient<WatchService>();    // execution-time measurement
+*/
+```
+
+---
+
+**Task and job configuration**
+
+The full queue, retry, pool, caching, timeout, job lifetime and scheduling options remain in the Usage walkthrough. Register the packages and services for the layer actually used; the core toolkit alone does not register the layered background-job framework. These APIs are configured in code, without a required shared appsettings file.
+
+## Development
+
+Install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
+
+From the repository root, restore, build and test:
+
+```bash
+dotnet restore Aiursoft.Canon.sln
+dotnet build Aiursoft.Canon.sln --no-restore
+dotnet test Aiursoft.Canon.sln --no-restore
+```
+
+Run `./lint.sh` for the existing static checks.
+
+## How to contribute
+
+There are many ways to contribute to the project: logging bugs, submitting pull requests, reporting issues, and creating suggestions.
+
+Even if you have push rights on the repository, you should create a personal fork and create feature branches there when you need them. This keeps the main repository clean and your workflow cruft out of sight.
+
+We're also interested in your feedback on the future of this project. You can submit a suggestion or feature request through the issue tracker. To make this process more effective, we're asking that these include more information to help define them more clearly.
+
+## License
+
+Licensed under the [MIT License](https://github.com/AiursoftWeb/canon/blob/master/LICENSE).
